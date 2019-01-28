@@ -1,0 +1,11 @@
+﻿select * from stu_payment_plan order by id desc
+
+select * from stu_payment_plan_ref where student_payment_id in ('57192fd30d864aada801d5590c59448f')
+
+select * from fin_bill where stu_id in ('94bcff96746b499186220d8d660c312e')
+
+select * from fin_bill_ref where bill_id in ('20181112043925475733')
+
+select fbp.* from fin_bill_plan fbp
+inner join stu_payment_plan_ref sppr on fbp.payment_plan_ref_id = sppr.id
+where sppr.student_payment_id in ('57192fd30d864aada801d5590c59448f')
