@@ -96,6 +96,8 @@ namespace KMISHelper.Business
                         var MonthDict = new Dictionary<string, MonthInfo>();
                         MonthDict = InitObject.SplitMonth(BillStartDate, Convert.ToInt32(dr[MonthPos]), myClassInfo.CalendarId, myYearInfo.YearID);
 
+
+                        // this method need add condition 
                         // Insert Into Payment Plan
 
                         if (!string.IsNullOrEmpty(StudentId))
@@ -108,7 +110,7 @@ namespace KMISHelper.Business
                             SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, "not found the student no."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Student Payment")));
                         }
 
-
+                        // this method need add condition
                         // Insert into fin bill
 
                         if (PaymentResult > 0)
