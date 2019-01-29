@@ -44,7 +44,7 @@ namespace KMISHelper.DBScript
 
         public string UpdateFinBill = "UPDATE fin_bill SET bill_sum_money = {0}, bill_sum_payment = {1} WHERE bill_id = '{2}'";
 
-        public string GetBillListByStudentId = "SELECT * FROM fin_bill WHERE stu_id = '{0}'";
+        public string GetBillListByStudentId = "SELECT * FROM fin_bill WHERE stu_id = '{0}' and bill_status = 'PAYMENTSTATE01' order by id desc";
 
         public string GetBillRefListByBillId = "SELECT * FROM fin_bill_ref WHERE bill_id = '{0}'";
 
@@ -85,6 +85,8 @@ namespace KMISHelper.DBScript
         public string GetStudentPaymentPlanListByID = "SELECT * FROM stu_payment_plan WHERE student_id = '{0}'";
 
         public string GetStudentPaymentPlanRefListByStudentID = "SELECT * FROM stu_payment_plan_ref WHERE student_payment_id = '{0}'";
+
+        public string GetStudentPyamentPlanListByStudentID = "select * from stu_payment_plan where student_id = '{0}' and effect_yn = 'Y' and del_yn = 'N'";
 
     }
 }

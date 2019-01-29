@@ -98,6 +98,11 @@ namespace KMISHelper.Business
         OFFSET
     }
 
+    struct StudentPaymentPlanInfo {
+        public string ID { get; set; }
+        public string StudentID { get; set; }
+
+    }
 
 
 }
