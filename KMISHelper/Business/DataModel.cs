@@ -104,5 +104,12 @@ namespace KMISHelper.Business
 
     }
 
+    struct AccountInfo {
+        public bool HasOnetimeAccount { get; set; }
+        public bool HasPrepaidAccount { get; set; }
+        public string PrepaidAccountID { get; set; }
+        public string OnetimeAccountID { get; set; }
+    }
+
 
 }

@@ -56,6 +56,8 @@ namespace KMISHelper.DBScript
 
         public string StudentBalanceAccountInsert = "INSERT INTO stu_balance_account(account_id,stu_balance_id,stu_id,account_amt,account_type,create_id,create_dts) VALUES ('{0}','{1}','{2}',{3},'{4}','{5}','{6}')";
 
+        public string SBAUpdate = "update stu_balance_account set account_amt = account_amt + {0},avl_amt = avl_amt + {1},update_id='{2}',update_dts = '{3}' where account_id = '{4}'";
+
         public string StudentBalanceAccountUpdate = "UPDATE stu_balance_account SET account_amt = {0} WHERE account_id = '{1}'";
 
         public string GetStudentBalanceAccountListByStudentIDAndSubject = "SELECT * FROM stu_balance_account WHERE stu_id = '{0}' AND account_type = '{1}'";
@@ -87,6 +89,8 @@ namespace KMISHelper.DBScript
         public string GetStudentPaymentPlanRefListByStudentID = "SELECT * FROM stu_payment_plan_ref WHERE student_payment_id = '{0}'";
 
         public string GetStudentPyamentPlanListByStudentID = "select * from stu_payment_plan where student_id = '{0}' and effect_yn = 'Y' and del_yn = 'N'";
+
+        public string GetBalanceAccountByStudentIDAndType = "select * from stu_balance_account where stu_id = '{0}' and account_type = '{1}'";
 
     }
 }
