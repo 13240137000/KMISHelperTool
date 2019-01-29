@@ -871,13 +871,21 @@ namespace KMISHelper.Business
 
                                     if (IsPaymentCreated > 0)
                                     {
-
+                                        // is append need to get IsHasOnceSubject
+                                        var myAccountInfo = new AccountInfo();
                                         var IsHasOnceSubject = false;
                                         var OnceSubjectAccount = string.Empty;
                                         var OnceMoney = new decimal(0);
 
+                                        if (BznsBase.IsAppend) {
+                                            myAccountInfo = GetAccountInfo(StudentId);
+                                            IsHasOnceSubject = myAccountInfo.HasOnetimeAccount;
+                                        }
+
                                         foreach (BillRefInfo bri in BillRefs)
                                         {
+
+                                            
 
                                             // Create Payment Ref
 
@@ -902,6 +910,9 @@ namespace KMISHelper.Business
                                             {
                                                 if (bri.Type.Trim() == "PAYMENTSUBJECT05")
                                                 {
+
+                                                    // Is Append.
+
                                                     var val = new decimal(0);
 
                                                     if (!PreTuitionInfo.IsDeductionPreTuition)
@@ -909,7 +920,21 @@ namespace KMISHelper.Business
                                                         val = PreTuitionInfo.PreTuitionMoney;
                                                     }
 
-                                                    Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, val, bri.Type, BznsBase.UserID, CreateDate);
+                                                    if (BznsBase.IsAppend)
+                                                    {
+                                                        if (myAccountInfo.HasPrepaidAccount)
+                                                        {
+                                                            Sql = string.Format(InitObject.GetScriptServiceInstance().SBAUpdate, val, val, BznsBase.UserID, CreateDate, myAccountInfo.PrepaidAccountID);
+                                                        }
+                                                        else {
+                                                            Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, val, bri.Type, BznsBase.UserID, CreateDate);
+                                                        }
+                                                    }
+                                                    else {
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, val, bri.Type, BznsBase.UserID, CreateDate);
+                                                    }
+
+                                                    
                                                 }
                                                 else
                                                 {
@@ -919,9 +944,13 @@ namespace KMISHelper.Business
                                             }
                                             else
                                             {
-
+                                                // is append if have one time subject update elase insert.
                                                 if (IsHasOnceSubject)
                                                 {
+                                                    if (BznsBase.IsAppend) {
+                                                        OnceSubjectAccount = myAccountInfo.OnetimeAccountID.ToString();
+                                                    }
+
                                                     OnceMoney = OnceMoney + bri.Money;
                                                     Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, OnceMoney, OnceSubjectAccount);
                                                     DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
@@ -959,6 +988,7 @@ namespace KMISHelper.Business
                                                     DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
                                                     break;
                                                 case "PAYMENTSUBJECT03":
+                                                    // is append
                                                     Sql = string.Format(InitObject.GetScriptServiceInstance().ItemAccountInsert, SubjectAccountId, AccountID, StudentId, BillInfo.YearId, bri.Money, 'Y', bri.Money, bri.RefID, BznsBase.UserID, CreateDate);
                                                     DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
                                                     break;
@@ -967,6 +997,7 @@ namespace KMISHelper.Business
                                                     DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
                                                     break;
                                                 case "PAYMENTSUBJECT05":
+                                                    // is append
                                                     //BillInfo.SumMoney = BillInfo.SumMoney - bri.Money;
                                                     var val = new decimal(0);
 
@@ -1023,7 +1054,9 @@ namespace KMISHelper.Business
 
                                 try
                                 {
-                                    BillPlanPaymentStatusUpdate(StudentId, trans);
+                                    if (!BznsBase.IsAppend) {
+                                        BillPlanPaymentStatusUpdate(StudentId, trans);
+                                    }
                                 }
                                 catch (Exception)
                                 {
@@ -1785,6 +1818,37 @@ namespace KMISHelper.Business
             return result;
         }
 
+        private AccountInfo GetAccountInfo(string sid) {
+            var result = new AccountInfo();
+            var sql = string.Empty;
+            var dt = new DataTable();
+            try
+            {
+                sql = string.Format(InitObject.GetScriptServiceInstance().GetBalanceAccountByStudentIDAndType, sid, "PAYMENTSUBJECT03");
+                dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, sql, null).Tables[0];
+                if (dt.Rows.Count > 0) {
+                    result.HasOnetimeAccount = true;
+                    result.OnetimeAccountID = dt.Rows[0]["account_id"].ToString();
+                }
+                sql = string.Format(InitObject.GetScriptServiceInstance().GetBalanceAccountByStudentIDAndType, sid, "PAYMENTSUBJECT05");
+                dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, sql, null).Tables[0];
+                if (dt.Rows.Count > 0)
+                {
+                    result.HasPrepaidAccount = true;
+                    result.PrepaidAccountID = dt.Rows[0]["account_id"].ToString();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            finally {
+                dt = null;
+            }
+            return result;
+
+        }
     }
 
 
