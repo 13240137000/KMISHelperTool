@@ -37,6 +37,8 @@
             this.ptMoney = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label37 = new System.Windows.Forms.Label();
+            this.tMonth = new System.Windows.Forms.ComboBox();
             this.tStartDate = new System.Windows.Forms.ComboBox();
             this.label34 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
@@ -54,6 +56,8 @@
             this.tMoney = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label38 = new System.Windows.Forms.Label();
+            this.mMonth = new System.Windows.Forms.ComboBox();
             this.mStartDate = new System.Windows.Forms.ComboBox();
             this.label33 = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
@@ -71,6 +75,8 @@
             this.mMoney1 = new System.Windows.Forms.ComboBox();
             this.mMoney2 = new System.Windows.Forms.ComboBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.sbMonth = new System.Windows.Forms.ComboBox();
+            this.label39 = new System.Windows.Forms.Label();
             this.sbStartDate = new System.Windows.Forms.ComboBox();
             this.label35 = new System.Windows.Forms.Label();
             this.label26 = new System.Windows.Forms.Label();
@@ -109,12 +115,7 @@
             this.label7 = new System.Windows.Forms.Label();
             this.cbStudentNo = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.tMonth = new System.Windows.Forms.ComboBox();
-            this.label37 = new System.Windows.Forms.Label();
-            this.mMonth = new System.Windows.Forms.ComboBox();
-            this.label38 = new System.Windows.Forms.Label();
-            this.sbMonth = new System.Windows.Forms.ComboBox();
-            this.label39 = new System.Windows.Forms.Label();
+            this.btnLog = new System.Windows.Forms.Button();
             this.groupBox5.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -233,6 +234,25 @@
             this.groupBox1.TabIndex = 39;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Tuition";
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(5, 525);
+            this.label37.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(49, 13);
+            this.label37.TabIndex = 26;
+            this.label37.Text = "Month：";
+            // 
+            // tMonth
+            // 
+            this.tMonth.FormattingEnabled = true;
+            this.tMonth.Location = new System.Drawing.Point(5, 547);
+            this.tMonth.Margin = new System.Windows.Forms.Padding(2);
+            this.tMonth.Name = "tMonth";
+            this.tMonth.Size = new System.Drawing.Size(160, 21);
+            this.tMonth.TabIndex = 27;
             // 
             // tStartDate
             // 
@@ -413,6 +433,25 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Meals";
             // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Location = new System.Drawing.Point(5, 525);
+            this.label38.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(49, 13);
+            this.label38.TabIndex = 57;
+            this.label38.Text = "Month：";
+            // 
+            // mMonth
+            // 
+            this.mMonth.FormattingEnabled = true;
+            this.mMonth.Location = new System.Drawing.Point(5, 547);
+            this.mMonth.Margin = new System.Windows.Forms.Padding(2);
+            this.mMonth.Name = "mMonth";
+            this.mMonth.Size = new System.Drawing.Size(160, 21);
+            this.mMonth.TabIndex = 55;
+            // 
             // mStartDate
             // 
             this.mStartDate.FormattingEnabled = true;
@@ -591,6 +630,25 @@
             this.groupBox3.TabIndex = 41;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "School Bus";
+            // 
+            // sbMonth
+            // 
+            this.sbMonth.FormattingEnabled = true;
+            this.sbMonth.Location = new System.Drawing.Point(5, 547);
+            this.sbMonth.Margin = new System.Windows.Forms.Padding(2);
+            this.sbMonth.Name = "sbMonth";
+            this.sbMonth.Size = new System.Drawing.Size(160, 21);
+            this.sbMonth.TabIndex = 60;
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.Location = new System.Drawing.Point(2, 525);
+            this.label39.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(49, 13);
+            this.label39.TabIndex = 59;
+            this.label39.Text = "Month：";
             // 
             // sbStartDate
             // 
@@ -972,68 +1030,23 @@
             this.label6.TabIndex = 20;
             this.label6.Text = "Student No.：";
             // 
-            // tMonth
+            // btnLog
             // 
-            this.tMonth.FormattingEnabled = true;
-            this.tMonth.Location = new System.Drawing.Point(5, 547);
-            this.tMonth.Margin = new System.Windows.Forms.Padding(2);
-            this.tMonth.Name = "tMonth";
-            this.tMonth.Size = new System.Drawing.Size(160, 21);
-            this.tMonth.TabIndex = 27;
-            // 
-            // label37
-            // 
-            this.label37.AutoSize = true;
-            this.label37.Location = new System.Drawing.Point(5, 525);
-            this.label37.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(49, 13);
-            this.label37.TabIndex = 26;
-            this.label37.Text = "Month：";
-            // 
-            // mMonth
-            // 
-            this.mMonth.FormattingEnabled = true;
-            this.mMonth.Location = new System.Drawing.Point(5, 547);
-            this.mMonth.Margin = new System.Windows.Forms.Padding(2);
-            this.mMonth.Name = "mMonth";
-            this.mMonth.Size = new System.Drawing.Size(160, 21);
-            this.mMonth.TabIndex = 55;
-            // 
-            // label38
-            // 
-            this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(5, 525);
-            this.label38.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label38.Name = "label38";
-            this.label38.Size = new System.Drawing.Size(49, 13);
-            this.label38.TabIndex = 57;
-            this.label38.Text = "Month：";
-            // 
-            // sbMonth
-            // 
-            this.sbMonth.FormattingEnabled = true;
-            this.sbMonth.Location = new System.Drawing.Point(5, 547);
-            this.sbMonth.Margin = new System.Windows.Forms.Padding(2);
-            this.sbMonth.Name = "sbMonth";
-            this.sbMonth.Size = new System.Drawing.Size(160, 21);
-            this.sbMonth.TabIndex = 60;
-            // 
-            // label39
-            // 
-            this.label39.AutoSize = true;
-            this.label39.Location = new System.Drawing.Point(2, 525);
-            this.label39.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label39.Name = "label39";
-            this.label39.Size = new System.Drawing.Size(49, 13);
-            this.label39.TabIndex = 59;
-            this.label39.Text = "Month：";
+            this.btnLog.Location = new System.Drawing.Point(548, 615);
+            this.btnLog.Margin = new System.Windows.Forms.Padding(2);
+            this.btnLog.Name = "btnLog";
+            this.btnLog.Size = new System.Drawing.Size(94, 28);
+            this.btnLog.TabIndex = 42;
+            this.btnLog.Text = "Test Log";
+            this.btnLog.UseVisualStyleBackColor = true;
+            this.btnLog.Click += new System.EventHandler(this.btnLog_Click);
             // 
             // frmImportFinanceForShangHai
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1011, 654);
+            this.Controls.Add(this.btnLog);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
@@ -1150,5 +1163,6 @@
         private System.Windows.Forms.ComboBox mMonth;
         private System.Windows.Forms.ComboBox sbMonth;
         private System.Windows.Forms.Label label39;
+        private System.Windows.Forms.Button btnLog;
     }
 }

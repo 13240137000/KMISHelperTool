@@ -8,6 +8,8 @@ using KMISHelper.HelpGlobal;
 using MySql.Data.MySqlClient;
 using System.Data;
 using System.Collections;
+using System.Configuration;
+using System.IO;
 
 namespace KMISHelper.Business
 {
@@ -15,6 +17,28 @@ namespace KMISHelper.Business
     {
 
         public readonly string ModuleName = "Finance";
+
+        public void WriteLog(string StudentNo) {
+
+            try
+            {
+                var FilePath = ConfigurationManager.AppSettings["WriteLogPath"];
+
+                StreamWriter file = new System.IO.StreamWriter(FilePath, false);
+                file.WriteLine(StudentNo);
+                file.Close();
+                file.Dispose();
+
+            }
+            catch (Exception e)
+            {
+
+                
+            }
+
+            
+
+        }
 
         public bool BillInsert(DataTable Students, int StudentNoPos, int YearTitlePos, int MonthPos, int BillStartDatePos, int PaymentMethodPos, int TuitionFeeMoneyPos, int DiscountMoneyPos, int DiscountNamePos, int StartDatePos, int PerTuitionFeeMoneyPos, int mfMethodPos, int mfMoneyPos, int mfStartDatePos, int scMethodPos, int scMoneyPos, int scMonthPos, int scStartDatePos, List<OnceInfo> ofs, bool IsTry2Import)
         {
@@ -42,6 +66,7 @@ namespace KMISHelper.Business
 
                         var DescBuilder = new StringBuilder().Clear();
                         var StudentNo = StudentNoPos == -1 ? string.Empty : dr[StudentNoPos].ToString();
+                        WriteLog(StudentNo);
                         var ClassId = string.Empty;
                         var StudentId = string.Empty;
                         var myClassInfo = new ClassInfo();
@@ -1225,7 +1250,7 @@ namespace KMISHelper.Business
 
                         var DescBuilder = new StringBuilder().Clear();
                         var StudentNo = StudentNoPos == -1 ? string.Empty : dr[StudentNoPos].ToString();
-                        
+                        WriteLog(StudentNo);
                         var ClassId = string.Empty;
                         var StudentId = string.Empty;
                         var dt = new DataTable();
@@ -1372,7 +1397,18 @@ namespace KMISHelper.Business
 
                             var PaymentMethod = "PAYMENTMODE04";
                             var TuitionFeeMoney = TMoneyPos == -1 ? string.Empty : dr[TMoneyPos].ToString();
-                            var StartDate = StartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[TStartDatePos]).ToString("yyyy-MM-dd");
+                            var StartDate = "";
+
+                            try
+                            {
+                                StartDate = StartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[TStartDatePos]).ToString("yyyy-MM-dd");
+                            }
+                            catch (Exception)
+                            {
+
+                            }
+
+
                             var TuitionFeeSubject = "PAYMENTSUBJECT01";
                             var RateId = TRateIDPos == -1 ? string.Empty : dr[TRateIDPos].ToString(); ;
                             var DetailID = InitObject.GetUUID();
@@ -1471,7 +1507,17 @@ namespace KMISHelper.Business
                             // Insert Into PaymentPlanRef - Meals 
 
                             var MealsMoney = MMoneyPos == -1 ? string.Empty : dr[MMoneyPos].ToString();
-                            var mStartDate = MStartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[MStartDatePos]).ToString("yyyy-MM-dd");
+                            var mStartDate = "";
+                            try
+                            {
+                                mStartDate = MStartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[MStartDatePos]).ToString("yyyy-MM-dd");
+                            }
+                            catch (Exception)
+                            {
+
+                            }
+                            
+                            
                             var MealsSubject = "PAYMENTSUBJECT02";
                             var mRateId = MRateIDPos == -1 ? string.Empty : dr[MRateIDPos].ToString();
                             var mDetailID = InitObject.GetUUID();
@@ -1563,7 +1609,17 @@ namespace KMISHelper.Business
                         // Insert Into PaymentPlanRef - Meals 
 
                         var sbMoney = SBMoneyPos == -1 ? string.Empty : dr[SBMoneyPos].ToString();
-                        var sbStartDate = SBStartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[SBStartDatePos]).ToString("yyyy-MM-dd");
+                        var sbStartDate = "";
+
+                        try
+                        {
+                            sbStartDate = SBStartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[SBStartDatePos]).ToString("yyyy-MM-dd");
+                        }
+                        catch (Exception)
+                        {
+                        }
+
+                        
                         var sbSubject = "PAYMENTSUBJECT04";
                         var sbRateId = SBRateIDPos == -1 ? string.Empty : dr[SBRateIDPos].ToString();
                         var sbDetailID = InitObject.GetUUID();
