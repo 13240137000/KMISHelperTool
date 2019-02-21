@@ -44,7 +44,7 @@ namespace KMISHelper.HelpGlobal
 
         public static readonly bool EnableMappingField = ConfigurationManager.AppSettings["EnableMappingField"].ToString().ToUpper() == "YES"?true:false;
 
-        public static readonly bool IsAppend = ConfigurationManager.AppSettings["IsAppend"].ToString().ToUpper() == "YES" ? true : false;
+        public static bool IsAppend = ConfigurationManager.AppSettings["IsAppend"].ToString().ToUpper() == "YES" ? true : false;
 
         public static readonly string UserPassword = "664E4D8BACB1A3F87BE61A643A3D4332";
 

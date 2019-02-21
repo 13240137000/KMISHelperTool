@@ -102,13 +102,21 @@ namespace KMISHelper.Business
         public string ID { get; set; }
         public string StudentID { get; set; }
 
+        public string Intro { get; set; }
+
     }
 
     struct AccountInfo {
         public bool HasOnetimeAccount { get; set; }
         public bool HasPrepaidAccount { get; set; }
+        public bool HasMealsAccount { get; set; }
+        public bool HasSchoolBusAccount { get; set; }
+        public bool HasTuitionAccount { get; set; }
         public string PrepaidAccountID { get; set; }
         public string OnetimeAccountID { get; set; }
+        public string MealsAccountID { get; set; }
+        public string SchoolBusAccountID { get; set; }
+        public string TuitionAccountID { get; set; }
     }
 
 

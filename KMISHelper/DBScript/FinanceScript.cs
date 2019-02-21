@@ -18,7 +18,7 @@ namespace KMISHelper.DBScript
 
         public string GetRateIdByKS = "SELECT fr.* FROM fin_rates fr INNER JOIN fin_rates_kindergarten_ref frkr ON frkr.rates_id = fr.rates_id WHERE fr.rates_subject = '{0}' AND frkr.kindergarten_id = '{1}' AND fr.year_id = '{2}'";
 
-        public string GetRateIdByAliasName = "SELECT fr.* FROM fin_rates fr INNER JOIN fin_rates_kindergarten_ref frkr ON frkr.rates_id = fr.rates_id WHERE fr.rates_subject = '{0}' AND frkr.kindergarten_id = '{1}' AND fr.year_id = '{2}' AND fr.rates_alias = '{3}'";
+        public string GetRateIdByAliasName = "SELECT fr.* FROM fin_rates fr INNER JOIN fin_rates_kindergarten_ref frkr ON frkr.rates_id = fr.rates_id WHERE fr.rates_subject = '{0}' AND frkr.kindergarten_id = '{1}' AND fr.year_id = '{2}' AND fr.rates_alias = '{3}' limit 1";
 
         public string GetDiscountIdByKMS = "SELECT fd.* FROM fin_discount fd INNER JOIN fin_discount_kindergarten_ref fdkr ON fdkr.discount_id = fd.discount_id WHERE fd.discount_subject = '{0}' AND fdkr.kindergarten_id = '{1}' AND discount_value = {2}";
 
@@ -58,7 +58,7 @@ namespace KMISHelper.DBScript
 
         public string SBAUpdate = "update stu_balance_account set account_amt = account_amt + {0},avl_amt = avl_amt + {1},update_id='{2}',update_dts = '{3}' where account_id = '{4}'";
 
-        public string StudentBalanceAccountUpdate = "UPDATE stu_balance_account SET account_amt = {0} WHERE account_id = '{1}'";
+        public string StudentBalanceAccountUpdate = "UPDATE stu_balance_account SET account_amt = account_amt + {0} WHERE account_id = '{1}'";
 
         public string GetStudentBalanceAccountListByStudentIDAndSubject = "SELECT * FROM stu_balance_account WHERE stu_id = '{0}' AND account_type = '{1}'";
 
@@ -72,7 +72,7 @@ namespace KMISHelper.DBScript
 
         public string ItemAccountInsert = "INSERT INTO stu_item_account(item_id,stu_account_id,stu_id,acad_year_id,account_amt,effect_yn,tbc_balance,bill_ref_id,create_id,create_dts) VALUES ('{0}','{1}','{2}','{3}',{4},'{5}',{6},'{7}','{8}','{9}')";
 
-        public string BalanceUpdate = "UPDATE stu_balance SET balance_total = {0},balance_income = {1} WHERE student_id = '{2}'";
+        public string BalanceUpdate = "UPDATE stu_balance SET balance_total = balance_total + {0},balance_income = balance_income + {1} WHERE student_id = '{2}'";
 
         public string BillUpdate = "UPDATE fin_bill SET bill_status = 'PAYMENTSTATE02',bill_sum_payment = bill_sum_money WHERE bill_id = '{0}'";
 
