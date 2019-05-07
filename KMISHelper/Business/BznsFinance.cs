@@ -784,7 +784,7 @@ namespace KMISHelper.Business
         public bool ChargeInsert(DataTable Students, int StudentNoPos, bool IsTry2Import = true)
         {
 
-            var result = false;
+           var result = false;
            var CreateDate = InitObject.GetSysDate();
 
             using (MySqlConnection conn = new MySqlConnection(BznsBase.GetConnectionString))
@@ -1942,7 +1942,6 @@ namespace KMISHelper.Business
             }
             return result;
         }
-
 
         private AccountInfo GetAccountInfo(string sid)
         {
