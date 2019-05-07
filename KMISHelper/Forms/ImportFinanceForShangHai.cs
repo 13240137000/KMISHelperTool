@@ -512,7 +512,9 @@ namespace KMISHelper.Forms
             return ret;
         }
 
-
-
+        private void btnLog_Click(object sender, EventArgs e)
+        {
+            GetFinanceInstance().WriteLog("123");
+        }
     }
 }
