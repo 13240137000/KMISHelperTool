@@ -711,6 +711,10 @@ namespace KMISHelper.Business
                         var Sql = string.Empty;
                         var dt = new DataTable();
                         var PreTuitionMoney = new decimal(0);
+                        var IsHaveTuition = false;
+                        var SBAInfo = new StudentBalanceAccountInfo();
+                        var SAInfo = new ExistAccountInfo();
+                        var IsHavePer = false;
 
                         try
                         {
@@ -727,7 +731,7 @@ namespace KMISHelper.Business
                                     ClassId = dt.Rows[0]["class_id"].ToString();
                                     StudentId = dt.Rows[0]["stu_id"].ToString();
                                 }
-
+                            
                                 // Get Student Balance Info
 
                                 Sql = string.Format(InitObject.GetScriptServiceInstance().GetStudentBalanceListByStudentId, StudentId);
@@ -740,6 +744,10 @@ namespace KMISHelper.Business
                                     StudentBalanceInfo.Total = Convert.ToDecimal(dt.Rows[0]["balance_total"]);
                                     StudentBalanceInfo.Income = Convert.ToDecimal(dt.Rows[0]["balance_income"]);
                                 }
+
+                                // Get Student Account Exist Info
+
+                                SAInfo = GetStudentAllAccount(StudentId);
 
 
                                 // Get Bill Info
@@ -775,11 +783,18 @@ namespace KMISHelper.Business
                                         BillRefInfo.Money = Convert.ToDecimal(row["bill_money"]);
                                         BillRefInfo.Payment = Convert.ToDecimal(row["bill_payment"]);
 
+                                        // -------------------------------------------------------------
+                                        // 如果有预缴学费科目，预缴学费赋值给PreTuitionMoney
                                         if (row["bill_type"].ToString() == "PAYMENTSUBJECT05")
                                         {
+                                            IsHavePer = true;
                                             PreTuitionMoney = Convert.ToDecimal(row["bill_money"]);
                                         }
 
+                                        if (row["bill_type"].ToString() == "PAYMENTSUBJECT01") {
+                                            IsHaveTuition = true;
+                                        }
+                                        // -------------------------------------------------------------
                                         BillRefs.Add(BillRefInfo);
                                     }
                                 }
@@ -788,7 +803,20 @@ namespace KMISHelper.Business
 
                                 PreTuitionInfo = GetPreTuitionInfo(BillRefs);
 
-                                // Create Student Payment
+
+                                SBAInfo = GetStudentBalanceAccountInfo(StudentId);
+
+
+                                if (IsHaveTuition && SBAInfo.AvlAmt > 0)
+                                {
+                                    PreTuitionInfo.IsLog = true;
+                                    PreTuitionInfo.IsDeductionPreTuition = true;
+                                    PreTuitionInfo.PreTuitionMoney = PreTuitionInfo.PreTuitionMoney + SBAInfo.AvlAmt;
+                                    PreTuitionMoney = PreTuitionMoney + SBAInfo.AvlAmt;
+                                }
+
+ 
+                                
 
                                 if (!string.IsNullOrEmpty(BillInfo.BillId) && BillRefs.Count > 0)
                                 {
@@ -799,15 +827,14 @@ namespace KMISHelper.Business
                                     var PaymentStatus = "PAYMENTSTATE02";
                                     var ReceiptNo = InitObject.GetPaymentInfo().ReceiptNo;
 
+
+                                    // Create Student Payment
+
                                     Sql = string.Format(InitObject.GetScriptServiceInstance().PaymentInsert, PaymentId, BillInfo.BillId, BillInfo.SumMoney, PaymentWay, CreateDate, PaymentNo, PaymentStatus, BznsBase.UserID, CreateDate, ReceiptNo);
                                     var IsPaymentCreated = DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
 
                                     if (IsPaymentCreated > 0)
                                     {
-
-                                        var IsHasOnceSubject = false;
-                                        var OnceSubjectAccount = string.Empty;
-                                        var OnceMoney = new decimal(0);
 
                                         foreach (BillRefInfo bri in BillRefs)
                                         {
@@ -815,6 +842,8 @@ namespace KMISHelper.Business
                                             // Create Payment Ref
 
                                             var PaymentRefId = InitObject.GetUUID();
+
+                                            //insert into (tuition-pre) money if type is tuition and pre than 0 
 
                                             if (PreTuitionMoney > 0 && bri.Type == "PAYMENTSUBJECT01")
                                             {
@@ -831,10 +860,49 @@ namespace KMISHelper.Business
 
                                             var AccountID = InitObject.GetUUID();
 
-                                            if (bri.Type.Trim() != "PAYMENTSUBJECT03")
-                                            {
-                                                if (bri.Type.Trim() == "PAYMENTSUBJECT05")
-                                                {
+                                            switch (bri.Type.Trim()) {
+
+                                                case "PAYMENTSUBJECT01":
+                                                    if (SAInfo.IsExistTuitionAccount)
+                                                    {
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, bri.Money, 0, SAInfo.TuitionAccountId);
+                                                    }
+                                                    else {
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate);
+                                                    }
+                                                    break;
+                                                case "PAYMENTSUBJECT02":
+                                                    if (SAInfo.IsExistMealsAccount)
+                                                    {
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, bri.Money, 0, SAInfo.MealesAccountId);
+                                                    }
+                                                    else
+                                                    {
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate);
+                                                    }
+                                                    break;
+                                                case "PAYMENTSUBJECT03":
+                                                    if (SAInfo.IsExistOtherAccount)
+                                                    {
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, bri.Money, 0, SAInfo.OtherAccountId);
+                                                    }
+                                                    else
+                                                    {
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate);
+                                                    }
+                                                    break;
+                                                case "PAYMENTSUBJECT04":
+                                                    if (SAInfo.IsExistSchoolBusAccount)
+                                                    {
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, bri.Money, 0, SAInfo.SchoolBusAccountId);
+                                                    }
+                                                    else
+                                                    {
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate);
+                                                    }
+                                                    break;
+                                                case "PAYMENTSUBJECT05":
+
                                                     var val = new decimal(0);
 
                                                     if (!PreTuitionInfo.IsDeductionPreTuition)
@@ -842,33 +910,21 @@ namespace KMISHelper.Business
                                                         val = PreTuitionInfo.PreTuitionMoney;
                                                     }
 
-                                                    Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, val, bri.Type, BznsBase.UserID, CreateDate);
-                                                }
-                                                else
-                                                {
-                                                    Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate);
-                                                }
-                                                DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
-                                            }
-                                            else
-                                            {
+                                                    if (SBAInfo.IsNone)
+                                                    {
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, val, bri.Type, BznsBase.UserID, CreateDate, val);
+                                                    }
+                                                    else
+                                                    {
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, val, val, SAInfo.PreAccountId);
+                                                    }
 
-                                                if (IsHasOnceSubject)
-                                                {
-                                                    OnceMoney = OnceMoney + bri.Money;
-                                                    Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, OnceMoney, OnceSubjectAccount);
-                                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
-                                                }
-                                                else
-                                                {
-                                                    IsHasOnceSubject = true;
-                                                    OnceSubjectAccount = AccountID;
-                                                    OnceMoney = bri.Money;
-                                                    Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate);
-                                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
-                                                }
-
+                                                    break;
                                             }
+
+
+                                            DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+
 
                                             // Create subject account
 
@@ -900,15 +956,17 @@ namespace KMISHelper.Business
                                                     DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
                                                     break;
                                                 case "PAYMENTSUBJECT05":
-                                                    //BillInfo.SumMoney = BillInfo.SumMoney - bri.Money;
+                                                    
                                                     var val = new decimal(0);
+                                                    var tbdMoney = new decimal(0);
 
                                                     if (!PreTuitionInfo.IsDeductionPreTuition)
                                                     {
                                                         val = PreTuitionInfo.PreTuitionMoney;
+                                                        tbdMoney = bri.Money;
                                                     }
 
-                                                    Sql = string.Format(InitObject.GetScriptServiceInstance().PrepaidTuitionAccountInsert, SubjectAccountId, AccountID, StudentId, BillInfo.YearId, val, 'Y', bri.Money, bri.RefID, BznsBase.UserID, CreateDate);
+                                                    Sql = string.Format(InitObject.GetScriptServiceInstance().PrepaidTuitionAccountInsert, SubjectAccountId, AccountID, StudentId, BillInfo.YearId, val, 'Y', tbdMoney , bri.RefID, BznsBase.UserID, CreateDate);
                                                     DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
 
                                                     if (PreTuitionInfo.IsLog)
@@ -925,10 +983,30 @@ namespace KMISHelper.Business
 
                                 }
 
+                                // 本账单中没有预缴学费但有学费，抵消预缴
+
+                                if (!IsHavePer && IsHaveTuition && SBAInfo.AvlAmt > 0)
+                                {
+
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, 0, (SBAInfo.AvlAmt * -1), SAInfo.PreAccountId);
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().UpdateStudentPrepaidTuitionAccount, 0, 0, 0, StudentId);
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+
+                                }
 
                                 // Update balance money
 
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().BalanceUpdate, PreTuitionInfo.PreTuitionMoney, BillInfo.SumMoney, StudentId);
+
+                                var m = new decimal(0);
+
+                                if (IsHaveTuition && SBAInfo.AvlAmt > 0)
+                                {
+                                    m = PreTuitionInfo.PreTuitionMoney;
+                                }
+
+                                Sql = string.Format(InitObject.GetScriptServiceInstance().BalanceUpdate, (BillInfo.SumMoney - m), (BillInfo.SumMoney - m), StudentId);
                                 DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
 
                                 // Update bill status
@@ -1009,20 +1087,24 @@ namespace KMISHelper.Business
         private PreTuitionInfo GetPreTuitionInfo(List<BillRefInfo> BillRefs)
         {
             var Info = new PreTuitionInfo();
-            var IsIncludeTuitionInfo = false;
+            var IsIncludeTuition = false;
             var i = 0;
             var HasPreTuition = false;
             var HasTuition = false;
             try
             {
+
+                // if have tuition
                 foreach (BillRefInfo bri in BillRefs)
                 {
                     if (bri.Type == "PAYMENTSUBJECT01")
                     {
-                        IsIncludeTuitionInfo = true;
+                        IsIncludeTuition = true;
                     }
                 }
-                if (!IsIncludeTuitionInfo)
+
+                // if not have tuition not deduction pre tuition
+                if (!IsIncludeTuition)
                 {
                     foreach (BillRefInfo bri in BillRefs)
                     {
@@ -1035,6 +1117,8 @@ namespace KMISHelper.Business
                         i++;
                     }
                 }
+
+                
 
                 foreach (BillRefInfo b in BillRefs)
                 {
@@ -1669,7 +1753,9 @@ namespace KMISHelper.Business
         }
 
         private decimal TotalMoney(decimal tm, decimal mm,decimal sbm,List<string> ofMoneys, string ptMoney) {
+
             var sum = new decimal(0);
+
             try
             {
                 if (!string.IsNullOrEmpty(ptMoney)) {
@@ -1686,12 +1772,126 @@ namespace KMISHelper.Business
                 }
 
             }
+
             catch (Exception)
             {
 
                 throw;
             }
+
             return sum;
+        }
+
+        private StudentBalanceAccountInfo GetStudentBalanceAccountInfo(string sid) {
+
+            var SBAInfo = new StudentBalanceAccountInfo();
+
+            try
+            {
+                // GetStudentBalanceAccountInfoBySID
+                var Sql = string.Format(InitObject.GetScriptServiceInstance().GetStudentBalanceAccountInfoBySID, sid);
+                var dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
+
+                if (dt.Rows.Count > 0)
+                {
+                    SBAInfo.AccountId = dt.Rows[0]["account_id"].ToString();
+                    SBAInfo.BalanceId = dt.Rows[0]["stu_balance_id"].ToString();
+                    SBAInfo.StudentId = dt.Rows[0]["stu_id"].ToString();
+                    SBAInfo.AccountAmt = Convert.ToDecimal(dt.Rows[0]["account_amt"].ToString());
+                    SBAInfo.AvlAmt = Convert.ToDecimal(dt.Rows[0]["avl_amt"].ToString());
+                    SBAInfo.IsNone = false;
+                }
+                else {
+                    SBAInfo.IsNone = true;
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            finally {
+
+            }
+
+            return SBAInfo;
+
+        }
+
+        private ExistAccountInfo GetStudentAllAccount(string sid) {
+
+            var EAInfo = new ExistAccountInfo
+            {
+                IsExistPreAccount = false,
+                IsExistTuitionAccount = false,
+                IsExistMealsAccount = false,
+                IsExistSchoolBusAccount = false,
+                IsExistOtherAccount = false,
+                PreAccountId = string.Empty,
+                TuitionAccountId = string.Empty,
+                MealesAccountId = string.Empty,
+                SchoolBusAccountId = string.Empty,
+                OtherAccountId = string.Empty 
+            };
+
+            try
+            {
+
+                var Sql = string.Format(InitObject.GetScriptServiceInstance().GetStudentAllAccountBySID, sid);
+                var dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
+
+                if (dt.Rows.Count > 0)
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+
+                        if (Convert.ToString(dr["account_type"]).ToUpper() == "PAYMENTSUBJECT01")
+                        {
+                            EAInfo.IsExistTuitionAccount = true;
+                            EAInfo.TuitionAccountId = dr["account_id"].ToString();
+                        }
+
+                        if (Convert.ToString(dr["account_type"]).ToUpper() == "PAYMENTSUBJECT02")
+                        {
+                            EAInfo.IsExistMealsAccount = true;
+                            EAInfo.MealesAccountId = dr["account_id"].ToString();
+                        }
+
+                        if (Convert.ToString(dr["account_type"]).ToUpper() == "PAYMENTSUBJECT03")
+                        {
+                            EAInfo.IsExistOtherAccount = true;
+                            EAInfo.OtherAccountId = dr["account_id"].ToString();
+                        }
+
+                        if (Convert.ToString(dr["account_type"]).ToUpper() == "PAYMENTSUBJECT04")
+                        {
+                            EAInfo.IsExistSchoolBusAccount = true;
+                            EAInfo.SchoolBusAccountId = dr["account_id"].ToString();
+                        }
+
+                        if (Convert.ToString(dr["account_type"]).ToUpper() == "PAYMENTSUBJECT05")
+                        {
+                            EAInfo.IsExistPreAccount = true;
+                            EAInfo.PreAccountId = dr["account_id"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            finally
+            {
+
+            }
+
+            return EAInfo;
+
         }
 
 

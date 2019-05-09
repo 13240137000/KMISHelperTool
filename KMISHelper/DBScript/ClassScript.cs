@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using KMISHelper.HelpGlobal;
 
 namespace KMISHelper.DBScript
 {
@@ -25,7 +26,7 @@ namespace KMISHelper.DBScript
 
         public string GetClassIdByYKN = "SELECT class_id FROM acad_class WHERE acad_year_id = '{0}' AND kindergarten_id = '{1}' AND class_label like '%{2}%' limit 1";
 
-        public string GetClassIDByStudentID = "SELECT sbi.stu_id,sc.class_id FROM stu_base_info sbi LEFT JOIN stu_class sc on sc.stu_id = sbi.stu_id WHERE sbi.stu_no = '{0}' limit 1";
+        public string GetClassIDByStudentID = "SELECT sbi.stu_id,sc.class_id FROM stu_base_info sbi LEFT JOIN stu_class sc on sc.stu_id = sbi.stu_id WHERE sbi.stu_no = '{0}' and kindergarten_id = '"+ BznsBase.KindergartenId  +"' limit 1";
 
         public string GetTerm = "SELECT term_id,term_begin_date,term_end_date,school_calendar_id FROM acad_school_term WHERE school_calendar_id = '{0}' ORDER BY school_calendar_id";
 

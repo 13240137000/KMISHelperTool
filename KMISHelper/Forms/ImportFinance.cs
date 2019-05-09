@@ -316,17 +316,19 @@ namespace KMISHelper.Forms
                 }
 
 
-                Result = GetFinanceInstance().BillInsert(Students, StudentNoPos, YearTitlePos, MonthPos, BillStartDatePos, PaymentMethodPos, TuitionFeeMoneyPos, DiscountMoneyPos, DiscountNamePos, StartDatePos, PerTuitionFeeMoneyPos, mfMethodPos, mfMoneyPos, mfStartDatePos, scMethodPos, scMoneyPos, scMonthPos, scStartDatePos, ofs, IsTry2Import);
+                Result = GetFinanceInstance().ChargeInsert(Students, StudentNoPos, true);
+
+                //Result = GetFinanceInstance().BillInsert(Students, StudentNoPos, YearTitlePos, MonthPos, BillStartDatePos, PaymentMethodPos, TuitionFeeMoneyPos, DiscountMoneyPos, DiscountNamePos, StartDatePos, PerTuitionFeeMoneyPos, mfMethodPos, mfMoneyPos, mfStartDatePos, scMethodPos, scMoneyPos, scMonthPos, scStartDatePos, ofs, IsTry2Import);
 
 
-                if (Result && !IsTry2Import)
-                {
-                    Result = GetFinanceInstance().ChargeInsert(Students, StudentNoPos, false);
-                }
-                else
-                {
-                    SysLog.Insert(new SysLogInfo("Import Payment Fail.", SysLogType.ERROR, "Import Finance FRM"));
-                }
+                //if (Result && !IsTry2Import)
+                //{
+                //    Result = GetFinanceInstance().ChargeInsert(Students, StudentNoPos, false);
+                //}
+                //else
+                //{
+                //    SysLog.Insert(new SysLogInfo("Import Payment Fail.", SysLogType.ERROR, "Import Finance FRM"));
+                //}
 
                 if (Result)
                 {

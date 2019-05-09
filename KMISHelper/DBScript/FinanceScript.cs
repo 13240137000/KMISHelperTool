@@ -44,7 +44,7 @@ namespace KMISHelper.DBScript
 
         public string UpdateFinBill = "UPDATE fin_bill SET bill_sum_money = {0}, bill_sum_payment = {1} WHERE bill_id = '{2}'";
 
-        public string GetBillListByStudentId = "SELECT * FROM fin_bill WHERE stu_id = '{0}'";
+        public string GetBillListByStudentId = "SELECT * FROM fin_bill WHERE stu_id = '{0}' AND effect_yn = 'Y' AND bill_type = 0 AND bill_status = 'PAYMENTSTATE01' ";
 
         public string GetBillRefListByBillId = "SELECT * FROM fin_bill_ref WHERE bill_id = '{0}'";
 
@@ -54,9 +54,11 @@ namespace KMISHelper.DBScript
 
         public string GetStudentBalanceListByStudentId = "SELECT * FROM stu_balance WHERE student_id = '{0}'";
 
-        public string StudentBalanceAccountInsert = "INSERT INTO stu_balance_account(account_id,stu_balance_id,stu_id,account_amt,account_type,create_id,create_dts) VALUES ('{0}','{1}','{2}',{3},'{4}','{5}','{6}')";
+        public string StudentBalanceAccountInsert = "INSERT INTO stu_balance_account(account_id,stu_balance_id,stu_id,account_amt,account_type,create_id,create_dts,avl_amt) VALUES ('{0}','{1}','{2}',{3},'{4}','{5}','{6}',{7})";
 
-        public string StudentBalanceAccountUpdate = "UPDATE stu_balance_account SET account_amt = {0} WHERE account_id = '{1}'";
+        public string StudentBalanceAccountUpdate = "UPDATE stu_balance_account SET account_amt = account_amt + {0}, avl_amt = avl_amt + {1} WHERE account_id = '{2}'";
+
+        public string UpdateStudentPrepaidTuitionAccount = "update stu_prepaid_tuition_account set account_amt = {0}, avl_amt = {1} , tbc_balance = {2} where stu_id = '{3}' and account_amt > 0";
 
         public string GetStudentBalanceAccountListByStudentIDAndSubject = "SELECT * FROM stu_balance_account WHERE stu_id = '{0}' AND account_type = '{1}'";
 
@@ -70,7 +72,7 @@ namespace KMISHelper.DBScript
 
         public string ItemAccountInsert = "INSERT INTO stu_item_account(item_id,stu_account_id,stu_id,acad_year_id,account_amt,effect_yn,tbc_balance,bill_ref_id,create_id,create_dts) VALUES ('{0}','{1}','{2}','{3}',{4},'{5}',{6},'{7}','{8}','{9}')";
 
-        public string BalanceUpdate = "UPDATE stu_balance SET balance_total = {0},balance_income = {1} WHERE student_id = '{2}'";
+        public string BalanceUpdate = "UPDATE stu_balance SET balance_total = balance_total + {0},balance_income = balance_income + {1} WHERE student_id = '{2}'";
 
         public string BillUpdate = "UPDATE fin_bill SET bill_status = 'PAYMENTSTATE02',bill_sum_payment = bill_sum_money WHERE bill_id = '{0}'";
 
@@ -85,6 +87,12 @@ namespace KMISHelper.DBScript
         public string GetStudentPaymentPlanListByID = "SELECT * FROM stu_payment_plan WHERE student_id = '{0}'";
 
         public string GetStudentPaymentPlanRefListByStudentID = "SELECT * FROM stu_payment_plan_ref WHERE student_payment_id = '{0}'";
+
+        public string GetStudentBalanceAccountInfoBySID = "select * from stu_balance_account where stu_id = '{0}' and account_type = 'PAYMENTSUBJECT05' ";
+
+        public string GetStudentAllAccountBySID = "select account_id,account_type from stu_balance_account where stu_id = '{0}' GROUP BY account_type";
+
+
 
     }
 }

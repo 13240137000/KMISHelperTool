@@ -68,6 +68,7 @@ namespace KMISHelper.Business
         public string BalanceId { get; set; }
         public decimal Total { get; set; }
         public decimal Income { get; set; }
+
     }
 
     struct PreTuitionInfo
@@ -82,6 +83,30 @@ namespace KMISHelper.Business
         public string Month { get; set; }
         public int MoneyPos { get; set; }
 
+    }
+
+    struct StudentBalanceAccountInfo {
+        public string AccountId { get; set; }
+        public string BalanceId { get; set; }
+        public string StudentId { get; set; }
+        public decimal AccountAmt { get; set; }
+        public decimal AvlAmt { get; set; }
+        public bool IsNone { get; set; }
+
+
+    }
+
+    struct ExistAccountInfo{
+        public bool IsExistPreAccount { get; set; }
+        public bool IsExistTuitionAccount { get; set; }
+        public bool IsExistMealsAccount { get; set; }
+        public bool IsExistSchoolBusAccount { get; set; }
+        public bool IsExistOtherAccount { get; set; }
+        public string PreAccountId { get; set; }
+        public string TuitionAccountId { get; set; }
+        public string MealesAccountId { get; set; }
+        public string SchoolBusAccountId { get; set; }
+        public string OtherAccountId { get; set; }
     }
 
     public enum SubjectLogType
