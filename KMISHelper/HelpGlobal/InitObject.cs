@@ -138,6 +138,7 @@ namespace KMISHelper.HelpGlobal
             }
             else {
                 result = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
+                //result = new DateTime(2019,3,30,0,0,0).ToString("yyyy-MM-dd hh:mm:ss");
             }
 
             return result;

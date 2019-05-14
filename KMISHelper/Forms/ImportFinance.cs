@@ -30,6 +30,8 @@ namespace KMISHelper.Forms
             return bz;
         }
 
+        private bool IsCharge = false;
+
         private DataTable Students = null;
 
         private bool IsTry2Import = false;
@@ -217,6 +219,7 @@ namespace KMISHelper.Forms
 
         }
 
+
         private void btnImport_Click(object sender, EventArgs e)
         {
 
@@ -315,20 +318,26 @@ namespace KMISHelper.Forms
                     ofs.Add(new OnceInfo() { Key = ofMoney7Pos, Value = cbofMoney7.Text.Trim() });
                 }
 
+                if (IsCharge)
+                {
+                    Result = GetFinanceInstance().ChargeInsert(Students, StudentNoPos, false);
+                }
+                else {
 
-                Result = GetFinanceInstance().ChargeInsert(Students, StudentNoPos, true);
-
-                //Result = GetFinanceInstance().BillInsert(Students, StudentNoPos, YearTitlePos, MonthPos, BillStartDatePos, PaymentMethodPos, TuitionFeeMoneyPos, DiscountMoneyPos, DiscountNamePos, StartDatePos, PerTuitionFeeMoneyPos, mfMethodPos, mfMoneyPos, mfStartDatePos, scMethodPos, scMoneyPos, scMonthPos, scStartDatePos, ofs, IsTry2Import);
+                    Result = GetFinanceInstance().BillInsert(Students, StudentNoPos, YearTitlePos, MonthPos, BillStartDatePos, PaymentMethodPos, TuitionFeeMoneyPos, DiscountMoneyPos, DiscountNamePos, StartDatePos, PerTuitionFeeMoneyPos, mfMethodPos, mfMoneyPos, mfStartDatePos, scMethodPos, scMoneyPos, scMonthPos, scStartDatePos, ofs, IsTry2Import);
 
 
-                //if (Result && !IsTry2Import)
-                //{
-                //    Result = GetFinanceInstance().ChargeInsert(Students, StudentNoPos, false);
-                //}
-                //else
-                //{
-                //    SysLog.Insert(new SysLogInfo("Import Payment Fail.", SysLogType.ERROR, "Import Finance FRM"));
-                //}
+                    if (Result && !IsTry2Import)
+                    {
+                        Result = GetFinanceInstance().ChargeInsert(Students, StudentNoPos, false);
+                    }
+                    else
+                    {
+                        SysLog.Insert(new SysLogInfo("Import Payment Fail.", SysLogType.ERROR, "Import Finance FRM"));
+                    }
+
+                }
+
 
                 if (Result)
                 {
@@ -350,6 +359,7 @@ namespace KMISHelper.Forms
                 ofs = null;
                 btnImport.Enabled = true;
                 MessageBox.Show(Message);
+                IsCharge = false;
             }
 
         }
@@ -360,5 +370,10 @@ namespace KMISHelper.Forms
             btnImport_Click(null, null);
         }
 
+        private void btnCharge_Click(object sender, EventArgs e)
+        {
+            IsCharge = true;
+            btnImport_Click(null, null);
+        }
     }
 }

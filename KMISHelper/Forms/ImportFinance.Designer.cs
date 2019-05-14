@@ -56,6 +56,8 @@
             this.cbmfMethod = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.cbscMonth = new System.Windows.Forms.ComboBox();
+            this.label23 = new System.Windows.Forms.Label();
             this.cbscStartDate = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
@@ -83,8 +85,7 @@
             this.btnUpload = new System.Windows.Forms.Button();
             this.btnPreImport = new System.Windows.Forms.Button();
             this.btnImport = new System.Windows.Forms.Button();
-            this.cbscMonth = new System.Windows.Forms.ComboBox();
-            this.label23 = new System.Windows.Forms.Label();
+            this.btnCharge = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -389,6 +390,25 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "School Car Fee";
             // 
+            // cbscMonth
+            // 
+            this.cbscMonth.FormattingEnabled = true;
+            this.cbscMonth.Location = new System.Drawing.Point(5, 223);
+            this.cbscMonth.Margin = new System.Windows.Forms.Padding(2);
+            this.cbscMonth.Name = "cbscMonth";
+            this.cbscMonth.Size = new System.Drawing.Size(160, 21);
+            this.cbscMonth.TabIndex = 13;
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(2, 198);
+            this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(49, 13);
+            this.label23.TabIndex = 12;
+            this.label23.Text = "Month：";
+            // 
             // cbscStartDate
             // 
             this.cbscStartDate.FormattingEnabled = true;
@@ -634,7 +654,7 @@
             // 
             // btnUpload
             // 
-            this.btnUpload.Location = new System.Drawing.Point(667, 550);
+            this.btnUpload.Location = new System.Drawing.Point(573, 550);
             this.btnUpload.Margin = new System.Windows.Forms.Padding(2);
             this.btnUpload.Name = "btnUpload";
             this.btnUpload.Size = new System.Drawing.Size(94, 28);
@@ -645,7 +665,7 @@
             // 
             // btnPreImport
             // 
-            this.btnPreImport.Location = new System.Drawing.Point(787, 550);
+            this.btnPreImport.Location = new System.Drawing.Point(686, 550);
             this.btnPreImport.Margin = new System.Windows.Forms.Padding(2);
             this.btnPreImport.Name = "btnPreImport";
             this.btnPreImport.Size = new System.Drawing.Size(94, 28);
@@ -665,30 +685,23 @@
             this.btnImport.UseVisualStyleBackColor = true;
             this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
             // 
-            // cbscMonth
+            // btnCharge
             // 
-            this.cbscMonth.FormattingEnabled = true;
-            this.cbscMonth.Location = new System.Drawing.Point(5, 223);
-            this.cbscMonth.Margin = new System.Windows.Forms.Padding(2);
-            this.cbscMonth.Name = "cbscMonth";
-            this.cbscMonth.Size = new System.Drawing.Size(160, 21);
-            this.cbscMonth.TabIndex = 13;
-            // 
-            // label23
-            // 
-            this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(2, 198);
-            this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(49, 13);
-            this.label23.TabIndex = 12;
-            this.label23.Text = "Month：";
+            this.btnCharge.Location = new System.Drawing.Point(797, 550);
+            this.btnCharge.Margin = new System.Windows.Forms.Padding(2);
+            this.btnCharge.Name = "btnCharge";
+            this.btnCharge.Size = new System.Drawing.Size(94, 28);
+            this.btnCharge.TabIndex = 35;
+            this.btnCharge.Text = "Charge";
+            this.btnCharge.UseVisualStyleBackColor = true;
+            this.btnCharge.Click += new System.EventHandler(this.btnCharge_Click);
             // 
             // ImportFinance
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1011, 586);
+            this.Controls.Add(this.btnCharge);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.btnImport);
             this.Controls.Add(this.btnPreImport);
@@ -775,5 +788,6 @@
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.ComboBox cbscMonth;
         private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.Button btnCharge;
     }
 }

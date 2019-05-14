@@ -8,6 +8,7 @@ using KMISHelper.HelpGlobal;
 using MySql.Data.MySqlClient;
 using System.Data;
 using System.Collections;
+using System.IO;
 
 namespace KMISHelper.Business
 {
@@ -26,6 +27,7 @@ namespace KMISHelper.Business
             var CreateDate = InitObject.GetSysDate();
             var DescAlias = string.Empty;
             var DescMonthlyPrice = new decimal(0);
+            var sno = string.Empty;
 
             using (MySqlConnection conn = new MySqlConnection(BznsBase.GetConnectionString))
             {
@@ -42,6 +44,7 @@ namespace KMISHelper.Business
 
                         var DescBuilder = new StringBuilder().Clear();
                         var StudentNo = StudentNoPos == -1 ? string.Empty : dr[StudentNoPos].ToString();
+                        Write(StudentNo);
                         var ClassId = string.Empty;
                         var StudentId = string.Empty;
                         var myClassInfo = new ClassInfo();
@@ -670,7 +673,7 @@ namespace KMISHelper.Business
                 catch (Exception ex)
                 {
 
-                    SysLog.Insert(new SysLogInfo(ex.Message.ToString(), SysLogType.ERROR, string.Concat(ModuleName, " - ", "Import Payment Bzns")));
+                    SysLog.Insert(new SysLogInfo(ex.Message.ToString() + sno, SysLogType.ERROR, string.Concat(ModuleName, " - ", "Import Payment Bzns")));
                     trans.Rollback();
                 }
 
@@ -688,7 +691,8 @@ namespace KMISHelper.Business
         {
 
             var result = false;
-            var CreateDate = InitObject.GetSysDate();
+            var CreateDate = new DateTime(2019, 3, 30, 0, 0, 0).ToString("yyyy-MM-dd hh:mm:ss"); //InitObject.GetSysDate();
+            var sno = string.Empty;
 
             using (MySqlConnection conn = new MySqlConnection(BznsBase.GetConnectionString))
             {
@@ -701,7 +705,9 @@ namespace KMISHelper.Business
                     foreach (DataRow dr in Students.Rows)
                     {
 
+
                         var StudentNo = StudentNoPos == -1 ? string.Empty : dr[StudentNoPos].ToString();
+                        sno = StudentNo;
                         var BillInfo = new BillInfo();
                         var StudentBalanceInfo = new StudentBalanceInfo();
                         List<BillRefInfo> BillRefs = new List<BillRefInfo>();
@@ -815,8 +821,6 @@ namespace KMISHelper.Business
                                     PreTuitionMoney = PreTuitionMoney + SBAInfo.AvlAmt;
                                 }
 
- 
-                                
 
                                 if (!string.IsNullOrEmpty(BillInfo.BillId) && BillRefs.Count > 0)
                                 {
@@ -830,7 +834,13 @@ namespace KMISHelper.Business
 
                                     // Create Student Payment
 
-                                    Sql = string.Format(InitObject.GetScriptServiceInstance().PaymentInsert, PaymentId, BillInfo.BillId, BillInfo.SumMoney, PaymentWay, CreateDate, PaymentNo, PaymentStatus, BznsBase.UserID, CreateDate, ReceiptNo);
+                                    var pyamentTotalMoney = BillInfo.SumMoney;
+
+                                    if (IsHaveTuition && SBAInfo.AvlAmt > 0) {
+                                        pyamentTotalMoney = BillInfo.SumMoney - SBAInfo.AvlAmt;
+                                    }
+
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().PaymentInsert, PaymentId, BillInfo.BillId, pyamentTotalMoney, PaymentWay, CreateDate, PaymentNo, PaymentStatus, BznsBase.UserID, CreateDate, ReceiptNo);
                                     var IsPaymentCreated = DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
 
                                     if (IsPaymentCreated > 0)
@@ -868,7 +878,7 @@ namespace KMISHelper.Business
                                                         Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, bri.Money, 0, SAInfo.TuitionAccountId);
                                                     }
                                                     else {
-                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate);
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate, 0);
                                                     }
                                                     break;
                                                 case "PAYMENTSUBJECT02":
@@ -878,7 +888,7 @@ namespace KMISHelper.Business
                                                     }
                                                     else
                                                     {
-                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate);
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate, 0);
                                                     }
                                                     break;
                                                 case "PAYMENTSUBJECT03":
@@ -888,7 +898,7 @@ namespace KMISHelper.Business
                                                     }
                                                     else
                                                     {
-                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate);
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate, 0);
                                                     }
                                                     break;
                                                 case "PAYMENTSUBJECT04":
@@ -898,7 +908,7 @@ namespace KMISHelper.Business
                                                     }
                                                     else
                                                     {
-                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate);
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate,0);
                                                     }
                                                     break;
                                                 case "PAYMENTSUBJECT05":
@@ -988,7 +998,7 @@ namespace KMISHelper.Business
                                 if (!IsHavePer && IsHaveTuition && SBAInfo.AvlAmt > 0)
                                 {
 
-                                    Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, 0, (SBAInfo.AvlAmt * -1), SAInfo.PreAccountId);
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, (SBAInfo.AvlAmt * -1), (SBAInfo.AvlAmt * -1), SAInfo.PreAccountId);
                                     DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
 
                                     Sql = string.Format(InitObject.GetScriptServiceInstance().UpdateStudentPrepaidTuitionAccount, 0, 0, 0, StudentId);
@@ -1047,6 +1057,7 @@ namespace KMISHelper.Business
                         }
                         catch (Exception e)
                         {
+
                             trans.Rollback();
                             SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " create charge error.", e.Message.ToString()), SysLogType.ERROR, string.Concat(ModuleName)));
                         }
@@ -1071,6 +1082,7 @@ namespace KMISHelper.Business
                 }
                 catch (Exception e)
                 {
+                    SysLog.Insert(new SysLogInfo(string.Concat(sno, " create charge error.", e.Message.ToString()), SysLogType.ERROR, string.Concat(ModuleName)));
                     trans.Rollback();
                 }
                 finally
@@ -1894,7 +1906,18 @@ namespace KMISHelper.Business
 
         }
 
-
+        public void Write(string sno)
+        {
+            //FileMode.Append为不覆盖文件效果.create为覆盖
+            FileStream fs = new FileStream(@"C:\Doyen\Export\log.txt", FileMode.Create);
+            //获得字节数组
+            byte[] data = System.Text.Encoding.Default.GetBytes(sno);
+            //开始写入
+            fs.Write(data, 0, data.Length);
+            //清空缓冲区、关闭流
+            fs.Flush();
+            fs.Close();
+        }
 
     }
 
