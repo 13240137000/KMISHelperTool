@@ -14,7 +14,11 @@ namespace KMISHelper.DBScript
 
         public string InsertStudentPaymentRef = "INSERT INTO stu_payment_plan_ref (id,rates_id,batch_number,student_payment_id,payment_type,payment_rule_subject,payment_money,pay_discount_id,payment_discount,payment_actual_money,payment_daily_money,status,create_id,create_dts,billing_start_date,payment_discount_value) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}',{6},'{7}','{8}',{9},{10},{11},'{12}','{13}','{14}',{15})";
 
+        public string UpdatePaymentRefForShanghai = "update stu_payment_plan_ref set pay_discount_id = '{0}', payment_discount = '{1}', payment_discount_value = {2}, payment_actual_money = {3}, update_id='{4}', update_dts = '{5}' where id = '{6}' ";
+
         public string GetRateIdByKMS = "SELECT fr.* FROM fin_rates fr INNER JOIN fin_rates_kindergarten_ref frkr ON frkr.rates_id = fr.rates_id WHERE fr.rates_monthly = {0} AND fr.rates_subject = '{1}' AND frkr.kindergarten_id = '{2}' AND fr.year_id = '{3}'";
+
+        public string GetRandRateIdByKMS = "SELECT fr.* FROM fin_rates fr INNER JOIN fin_rates_kindergarten_ref frkr ON frkr.rates_id = fr.rates_id WHERE fr.rates_subject = '{0}' AND frkr.kindergarten_id = '{1}' AND fr.year_id = '{2}' order by fr.id asc limit 1";
 
         public string GetRateIdByKS = "SELECT fr.* FROM fin_rates fr INNER JOIN fin_rates_kindergarten_ref frkr ON frkr.rates_id = fr.rates_id WHERE fr.rates_subject = '{0}' AND frkr.kindergarten_id = '{1}' AND fr.year_id = '{2}'";
 
@@ -82,7 +86,7 @@ namespace KMISHelper.DBScript
 
         public string StudentBalanceLogInsert = "INSERT INTO stu_balance_log(log_type,student_id,log_money,log_time,log_way,del_yn,stu_balance_account_id,bill_id,log_info) VALUES ('{0}','{1}',{2},'{3}','{4}','{5}','{6}','{7}','{8}')";
 
-        public string BillPlanUpdate = "UPDATE fin_bill_plan SET pay_yn = 'Y' WHERE payment_plan_ref_id = '{0}'";
+        public string BillPlanUpdate = "UPDATE fin_bill_plan SET pay_yn = 'Y' WHERE payment_plan_ref_id = '{0}' and bill_status = 1";
 
         public string GetStudentPaymentPlanListByID = "SELECT * FROM stu_payment_plan WHERE student_id = '{0}'";
 
@@ -92,7 +96,39 @@ namespace KMISHelper.DBScript
 
         public string GetStudentAllAccountBySID = "select account_id,account_type from stu_balance_account where stu_id = '{0}' GROUP BY account_type";
 
+        public string GetStudentPaymentPlanInfoBySID = "select * from stu_payment_plan where effect_yn='Y' and del_yn = 'N' and student_id = '{0}' limit 1";
 
+        public string GetStudentPaymentPlanRefInfoBySPPIDAndSubject = "select * from stu_payment_plan_ref where student_payment_id = '{0}' and payment_rule_subject = '{1}' and del_yn = 'N' order by create_dts asc limit 1";
+
+        public string GetBillPlanBySubjectAndStartDateAndEndDate = "select * from fin_bill_plan where bill_date_start BETWEEN '{0}' and '{1}' and effect_yn = 'Y' and bill_type = '{2}' and payment_plan_ref_id = '{3}' "; //and pay_yn = 'Y' 
+
+        public string GetRatesByID = "select id,rates_id,rates_alias,rates_monthly from fin_rates where rates_id = '{0}'";
+
+        public string GetStudentsForUpdate = "select stu_id from stu_base_info where kindergarten_id = '{0}'  ";
+
+        public string GetSPPForUpdate = "select * from stu_payment_plan where student_id = '{0}' order by id asc";
+
+        public string DeleteSPPForUpdate = "delete from stu_payment_plan where student_id = '{0}' and student_payment_id <> '{1}'";
+
+        public string DeleteSPPRForUpdate = "delete from stu_payment_plan_ref where student_payment_id = '{0}' and payment_rule_subject in ('PAYMENTSUBJECT03','PAYMENTSUBJECT05')";
+
+        public string UpdateSPPRForUpdate = "update stu_payment_plan_ref set student_payment_id = '{0}' where student_payment_id = '{1}'";
+
+        public string GetSPPRBySubjectAndSPPIDForUpdate = "select * from stu_payment_plan_ref where student_payment_id = '{0}' and payment_rule_subject = '{1}' order by create_dts asc";
+
+        public string DeleteSPPRBySubjectAndSPPIDForUpdate = "delete from stu_payment_plan_ref where id = '{0}'";
+
+        public string GetNewSPPRForUpdate = "select * from stu_payment_plan_ref where student_payment_id = '{0}'";
+
+        public string GetBillRefByBillIDForUpdate = "select * from fin_bill_ref where bill_id in (select bill_id from fin_bill where stu_id = '{0}')";
+
+        public string UpdateBillRefByIDForUpdate = "update fin_bill_ref set payment_plan_ref_id = '{0}' where id = {1} ";
+
+        public string DeleteSPP = "delete fbp from fin_bill_plan fbp  inner join fin_bill_ref fbr on fbp. bill_no = fbr. bill_no inner join fin_bill fb on fb.bill_id = fbr.bill_id and fb.bill_status='PAYMENTSTATE01' inner join stu_base_info sbi on sbi.stu_id = fb.stu_id where sbi.kindergarten_id = '{0}' ";
+
+        public string DeleteSPPR = "Delete fbr from fin_bill_ref fbr inner join fin_bill fb on  fb.bill_id = fbr.bill_id and fb.bill_status='PAYMENTSTATE01' inner join stu_base_info sbi on sbi.stu_id = fb.stu_id where sbi.kindergarten_id = '{0}'";
+
+        public string DeleteFB = "Delete fb from fin_bill fb inner join stu_base_info sbi on sbi.stu_id = fb.stu_id where bill_status='PAYMENTSTATE01'and sbi.kindergarten_id = '{0}'";
 
     }
 }

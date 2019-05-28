@@ -47,7 +47,7 @@ namespace KMISHelper.Business
                         var BirthDay = BirthDayPos == -1 ? string.Empty : dr[BirthDayPos].ToString().Replace("/", "-");
                         var StudentNo = StudentNoPos == -1 ? string.Empty : dr[StudentNoPos].ToString();
                         var Status = StatusPos == -1 ? string.Empty : InitObject.GetStatusByName(dr[StatusPos].ToString());
-                        var PlanTime = PlanTimePos == -1 ? string.Empty : dr[PlanTimePos].ToString().Replace("/", "-");
+                        var PlanTime = PlanTimePos == -1 ? string.Empty : Convert.ToDateTime(dr[PlanTimePos]).ToString("yyyy-MM-dd");
                         var Nation = NationPos == -1 ? string.Empty : InitObject.GetNationCodeByName(dr[NationPos].ToString());
                         var ClassName = ClassNamePos == -1 ? string.Empty : dr[ClassNamePos].ToString();
 
@@ -245,7 +245,7 @@ namespace KMISHelper.Business
                 }
                 catch (Exception ex)
                 {
-
+                    Result = false;
                     SysLog.Insert(new SysLogInfo(ex.Message.ToString(), SysLogType.ERROR, string.Concat(ModuleName, " - ", "Import Student Bzns")));
                     trans.Rollback();
                 }

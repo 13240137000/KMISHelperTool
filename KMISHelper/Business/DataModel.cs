@@ -109,6 +109,66 @@ namespace KMISHelper.Business
         public string OtherAccountId { get; set; }
     }
 
+    struct StudentPaymentPlanInfo {
+        public int id { get; set; }
+        public string student_payment_id { get; set; }
+        public string student_id { get; set; }
+        public string rates_id { get; set; }
+    }
+
+    struct StudentPaymentPlanRefInfo {
+
+        public string id { get; set; }
+        public string rates_id { get; set; }
+        public string batch_number { get; set; }
+        public string student_payment_id { get; set; }
+        public string payment_rule_subject { get; set; }
+        public string payment_type { get; set; }
+        public decimal payment_money { get; set; }
+        public string pay_discount_id { get; set; }
+        public string payment_discount { get; set; }
+        public decimal payment_discount_value { get; set; }
+        public decimal payment_actual_money { get; set; }
+        public decimal payment_daily_money { get; set; }
+        public string week_days { get; set; }
+        public int status { get; set; }
+        public DateTime billing_start_date { get; set; }
+        public int plan_month { get; set; }
+        public string process_instance_id { get; set; }
+        public DateTime discount_valid_date { get; set; }
+    }
+
+    struct BillPlanInfo {
+        public int id { get; set; }
+        public string bill_plan_id { get; set; }
+        public string bill_no { get; set; }
+        public string bill_type { get; set; }
+        public string payment_plan_ref_id { get; set; }
+        public decimal daily_unit_price { get; set; }
+        public int teaching_days_actual { get; set; }
+        public int teaching_days_total { get; set; }
+        public decimal bill_original_price { get; set; }
+        public decimal bill_discount_price { get; set; }
+        public DateTime bill_date_start { get; set; }
+        public DateTime bill_date_end { get; set; }
+        public int bill_status { get; set; }
+        public string first_month_yn { get; set; }
+        public string effect_yn { get; set; }
+        public string pay_yn { get; set; }
+        public DateTime create_dts { get; set; }
+        public string create_by { get; set; }
+        public string update_by { get; set; }
+        public DateTime update_dts { get; set; }
+
+    }
+
+    struct RatesInfo {
+        public int id { get; set; }
+        public string rates_id { get; set; }
+        public string rates_alias { get; set; }
+        public decimal rates_monthly { get; set; }
+    }
+
     public enum SubjectLogType
     {
         //虚增
@@ -122,6 +182,8 @@ namespace KMISHelper.Business
         //充抵
         OFFSET
     }
+
+
 
 
 

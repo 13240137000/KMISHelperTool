@@ -22,5 +22,4 @@ C:\Doyen\KmisHelper\KMISHelper\KMISHelper\obj\Debug\KMISHelper.Forms.ImportTeach
 C:\Doyen\KmisHelper\KMISHelper\KMISHelper\obj\Debug\KMISHelper.Forms.InterestClass.resources
 C:\Doyen\KmisHelper\KMISHelper\KMISHelper\obj\Debug\KMISHelper.Forms.ImportStudent.resources
 C:\Doyen\KmisHelper\KMISHelper\KMISHelper\obj\Debug\KMISHelper.Forms.ImportUsers.resources
-C:\Doyen\KmisHelper\KMISHelper\KMISHelper\obj\Debug\KMISHelper.csprojAssemblyReference.cache
 C:\Doyen\KmisHelper\KMISHelper\KMISHelper\obj\Debug\KMISHelper.Forms.frmImportFinanceForShangHai.resources

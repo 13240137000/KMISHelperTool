@@ -37,6 +37,8 @@
             this.ptMoney = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label37 = new System.Windows.Forms.Label();
+            this.tMonth = new System.Windows.Forms.ComboBox();
             this.tStartDate = new System.Windows.Forms.ComboBox();
             this.label34 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
@@ -54,6 +56,8 @@
             this.tMoney = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label38 = new System.Windows.Forms.Label();
+            this.mMonth = new System.Windows.Forms.ComboBox();
             this.mStartDate = new System.Windows.Forms.ComboBox();
             this.label33 = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
@@ -71,6 +75,8 @@
             this.mMoney1 = new System.Windows.Forms.ComboBox();
             this.mMoney2 = new System.Windows.Forms.ComboBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.sbMonth = new System.Windows.Forms.ComboBox();
+            this.label39 = new System.Windows.Forms.Label();
             this.sbStartDate = new System.Windows.Forms.ComboBox();
             this.label35 = new System.Windows.Forms.Label();
             this.label26 = new System.Windows.Forms.Label();
@@ -109,23 +115,31 @@
             this.label7 = new System.Windows.Forms.Label();
             this.cbStudentNo = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.tMonth = new System.Windows.Forms.ComboBox();
-            this.label37 = new System.Windows.Forms.Label();
-            this.mMonth = new System.Windows.Forms.ComboBox();
-            this.label38 = new System.Windows.Forms.Label();
-            this.sbMonth = new System.Windows.Forms.ComboBox();
-            this.label39 = new System.Windows.Forms.Label();
+            this.label40 = new System.Windows.Forms.Label();
+            this.tMoney6 = new System.Windows.Forms.ComboBox();
+            this.label41 = new System.Windows.Forms.Label();
+            this.mMoney6 = new System.Windows.Forms.ComboBox();
+            this.label42 = new System.Windows.Forms.Label();
+            this.sbMoney6 = new System.Windows.Forms.ComboBox();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.DiscountMoney = new System.Windows.Forms.ComboBox();
+            this.lblDiscountMoney = new System.Windows.Forms.Label();
+            this.DiscountId = new System.Windows.Forms.ComboBox();
+            this.label45 = new System.Windows.Forms.Label();
+            this.DiscountType = new System.Windows.Forms.ComboBox();
+            this.label43 = new System.Windows.Forms.Label();
             this.groupBox5.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox6.SuspendLayout();
+            this.groupBox7.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnImport
             // 
-            this.btnImport.Location = new System.Drawing.Point(906, 615);
+            this.btnImport.Location = new System.Drawing.Point(867, 590);
             this.btnImport.Margin = new System.Windows.Forms.Padding(2);
             this.btnImport.Name = "btnImport";
             this.btnImport.Size = new System.Drawing.Size(94, 28);
@@ -136,7 +150,7 @@
             // 
             // btnPreImport
             // 
-            this.btnPreImport.Location = new System.Drawing.Point(788, 615);
+            this.btnPreImport.Location = new System.Drawing.Point(867, 547);
             this.btnPreImport.Margin = new System.Windows.Forms.Padding(2);
             this.btnPreImport.Name = "btnPreImport";
             this.btnPreImport.Size = new System.Drawing.Size(94, 28);
@@ -147,7 +161,7 @@
             // 
             // btnUpload
             // 
-            this.btnUpload.Location = new System.Drawing.Point(668, 615);
+            this.btnUpload.Location = new System.Drawing.Point(867, 497);
             this.btnUpload.Margin = new System.Windows.Forms.Padding(2);
             this.btnUpload.Name = "btnUpload";
             this.btnUpload.Size = new System.Drawing.Size(94, 28);
@@ -164,7 +178,7 @@
             this.groupBox5.Controls.Add(this.label4);
             this.groupBox5.Location = new System.Drawing.Point(23, 12);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(170, 257);
+            this.groupBox5.Size = new System.Drawing.Size(170, 156);
             this.groupBox5.TabIndex = 38;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Per Tuition";
@@ -209,6 +223,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label40);
+            this.groupBox1.Controls.Add(this.tMoney6);
             this.groupBox1.Controls.Add(this.label37);
             this.groupBox1.Controls.Add(this.tMonth);
             this.groupBox1.Controls.Add(this.tStartDate);
@@ -229,15 +245,34 @@
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(223, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(170, 588);
+            this.groupBox1.Size = new System.Drawing.Size(170, 630);
             this.groupBox1.TabIndex = 39;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Tuition";
             // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(5, 576);
+            this.label37.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(49, 13);
+            this.label37.TabIndex = 26;
+            this.label37.Text = "Month：";
+            // 
+            // tMonth
+            // 
+            this.tMonth.FormattingEnabled = true;
+            this.tMonth.Location = new System.Drawing.Point(5, 598);
+            this.tMonth.Margin = new System.Windows.Forms.Padding(2);
+            this.tMonth.Name = "tMonth";
+            this.tMonth.Size = new System.Drawing.Size(160, 21);
+            this.tMonth.TabIndex = 27;
+            // 
             // tStartDate
             // 
             this.tStartDate.FormattingEnabled = true;
-            this.tStartDate.Location = new System.Drawing.Point(5, 491);
+            this.tStartDate.Location = new System.Drawing.Point(5, 542);
             this.tStartDate.Margin = new System.Windows.Forms.Padding(2);
             this.tStartDate.Name = "tStartDate";
             this.tStartDate.Size = new System.Drawing.Size(160, 21);
@@ -246,7 +281,7 @@
             // label34
             // 
             this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(2, 466);
+            this.label34.Location = new System.Drawing.Point(2, 517);
             this.label34.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label34.Name = "label34";
             this.label34.Size = new System.Drawing.Size(67, 13);
@@ -266,7 +301,7 @@
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(5, 344);
+            this.label15.Location = new System.Drawing.Point(5, 335);
             this.label15.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(60, 13);
@@ -276,7 +311,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(5, 284);
+            this.label14.Location = new System.Drawing.Point(5, 275);
             this.label14.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(60, 13);
@@ -306,7 +341,7 @@
             // tRateID
             // 
             this.tRateID.FormattingEnabled = true;
-            this.tRateID.Location = new System.Drawing.Point(5, 428);
+            this.tRateID.Location = new System.Drawing.Point(5, 479);
             this.tRateID.Margin = new System.Windows.Forms.Padding(2);
             this.tRateID.Name = "tRateID";
             this.tRateID.Size = new System.Drawing.Size(160, 21);
@@ -315,7 +350,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(5, 403);
+            this.label9.Location = new System.Drawing.Point(5, 454);
             this.label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(56, 13);
@@ -325,7 +360,7 @@
             // tMoney5
             // 
             this.tMoney5.FormattingEnabled = true;
-            this.tMoney5.Location = new System.Drawing.Point(5, 369);
+            this.tMoney5.Location = new System.Drawing.Point(5, 360);
             this.tMoney5.Margin = new System.Windows.Forms.Padding(2);
             this.tMoney5.Name = "tMoney5";
             this.tMoney5.Size = new System.Drawing.Size(160, 21);
@@ -334,7 +369,7 @@
             // tMoney4
             // 
             this.tMoney4.FormattingEnabled = true;
-            this.tMoney4.Location = new System.Drawing.Point(5, 309);
+            this.tMoney4.Location = new System.Drawing.Point(5, 300);
             this.tMoney4.Margin = new System.Windows.Forms.Padding(2);
             this.tMoney4.Name = "tMoney4";
             this.tMoney4.Size = new System.Drawing.Size(160, 21);
@@ -388,6 +423,8 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.label41);
+            this.groupBox2.Controls.Add(this.mMoney6);
             this.groupBox2.Controls.Add(this.label38);
             this.groupBox2.Controls.Add(this.mMonth);
             this.groupBox2.Controls.Add(this.mStartDate);
@@ -408,15 +445,34 @@
             this.groupBox2.Controls.Add(this.mMoney2);
             this.groupBox2.Location = new System.Drawing.Point(424, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(170, 588);
+            this.groupBox2.Size = new System.Drawing.Size(170, 630);
             this.groupBox2.TabIndex = 40;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Meals";
             // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Location = new System.Drawing.Point(5, 576);
+            this.label38.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(49, 13);
+            this.label38.TabIndex = 57;
+            this.label38.Text = "Month：";
+            // 
+            // mMonth
+            // 
+            this.mMonth.FormattingEnabled = true;
+            this.mMonth.Location = new System.Drawing.Point(5, 598);
+            this.mMonth.Margin = new System.Windows.Forms.Padding(2);
+            this.mMonth.Name = "mMonth";
+            this.mMonth.Size = new System.Drawing.Size(160, 21);
+            this.mMonth.TabIndex = 55;
+            // 
             // mStartDate
             // 
             this.mStartDate.FormattingEnabled = true;
-            this.mStartDate.Location = new System.Drawing.Point(5, 491);
+            this.mStartDate.Location = new System.Drawing.Point(5, 542);
             this.mStartDate.Margin = new System.Windows.Forms.Padding(2);
             this.mStartDate.Name = "mStartDate";
             this.mStartDate.Size = new System.Drawing.Size(160, 21);
@@ -425,7 +481,7 @@
             // label33
             // 
             this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(2, 466);
+            this.label33.Location = new System.Drawing.Point(2, 517);
             this.label33.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label33.Name = "label33";
             this.label33.Size = new System.Drawing.Size(67, 13);
@@ -435,7 +491,7 @@
             // label25
             // 
             this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(5, 344);
+            this.label25.Location = new System.Drawing.Point(5, 335);
             this.label25.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(60, 13);
@@ -445,7 +501,7 @@
             // label23
             // 
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(5, 284);
+            this.label23.Location = new System.Drawing.Point(5, 275);
             this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(60, 13);
@@ -485,7 +541,7 @@
             // mRateID
             // 
             this.mRateID.FormattingEnabled = true;
-            this.mRateID.Location = new System.Drawing.Point(5, 428);
+            this.mRateID.Location = new System.Drawing.Point(5, 479);
             this.mRateID.Margin = new System.Windows.Forms.Padding(2);
             this.mRateID.Name = "mRateID";
             this.mRateID.Size = new System.Drawing.Size(160, 21);
@@ -494,7 +550,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(5, 403);
+            this.label2.Location = new System.Drawing.Point(5, 454);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(56, 13);
@@ -504,7 +560,7 @@
             // mMoney5
             // 
             this.mMoney5.FormattingEnabled = true;
-            this.mMoney5.Location = new System.Drawing.Point(5, 369);
+            this.mMoney5.Location = new System.Drawing.Point(5, 360);
             this.mMoney5.Margin = new System.Windows.Forms.Padding(2);
             this.mMoney5.Name = "mMoney5";
             this.mMoney5.Size = new System.Drawing.Size(160, 21);
@@ -523,7 +579,7 @@
             // mMoney4
             // 
             this.mMoney4.FormattingEnabled = true;
-            this.mMoney4.Location = new System.Drawing.Point(5, 309);
+            this.mMoney4.Location = new System.Drawing.Point(5, 300);
             this.mMoney4.Margin = new System.Windows.Forms.Padding(2);
             this.mMoney4.Name = "mMoney4";
             this.mMoney4.Size = new System.Drawing.Size(160, 21);
@@ -567,6 +623,8 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.label42);
+            this.groupBox3.Controls.Add(this.sbMoney6);
             this.groupBox3.Controls.Add(this.sbMonth);
             this.groupBox3.Controls.Add(this.label39);
             this.groupBox3.Controls.Add(this.sbStartDate);
@@ -587,15 +645,34 @@
             this.groupBox3.Controls.Add(this.sbMoney2);
             this.groupBox3.Location = new System.Drawing.Point(624, 12);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(170, 588);
+            this.groupBox3.Size = new System.Drawing.Size(170, 630);
             this.groupBox3.TabIndex = 41;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "School Bus";
             // 
+            // sbMonth
+            // 
+            this.sbMonth.FormattingEnabled = true;
+            this.sbMonth.Location = new System.Drawing.Point(5, 598);
+            this.sbMonth.Margin = new System.Windows.Forms.Padding(2);
+            this.sbMonth.Name = "sbMonth";
+            this.sbMonth.Size = new System.Drawing.Size(160, 21);
+            this.sbMonth.TabIndex = 60;
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.Location = new System.Drawing.Point(2, 576);
+            this.label39.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(49, 13);
+            this.label39.TabIndex = 59;
+            this.label39.Text = "Month：";
+            // 
             // sbStartDate
             // 
             this.sbStartDate.FormattingEnabled = true;
-            this.sbStartDate.Location = new System.Drawing.Point(5, 491);
+            this.sbStartDate.Location = new System.Drawing.Point(5, 542);
             this.sbStartDate.Margin = new System.Windows.Forms.Padding(2);
             this.sbStartDate.Name = "sbStartDate";
             this.sbStartDate.Size = new System.Drawing.Size(160, 21);
@@ -604,7 +681,7 @@
             // label35
             // 
             this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(2, 466);
+            this.label35.Location = new System.Drawing.Point(2, 517);
             this.label35.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label35.Name = "label35";
             this.label35.Size = new System.Drawing.Size(67, 13);
@@ -614,7 +691,7 @@
             // label26
             // 
             this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(5, 344);
+            this.label26.Location = new System.Drawing.Point(5, 335);
             this.label26.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(60, 13);
@@ -624,7 +701,7 @@
             // label24
             // 
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(5, 284);
+            this.label24.Location = new System.Drawing.Point(5, 275);
             this.label24.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(60, 13);
@@ -664,7 +741,7 @@
             // sbRateID
             // 
             this.sbRateID.FormattingEnabled = true;
-            this.sbRateID.Location = new System.Drawing.Point(5, 428);
+            this.sbRateID.Location = new System.Drawing.Point(5, 479);
             this.sbRateID.Margin = new System.Windows.Forms.Padding(2);
             this.sbRateID.Name = "sbRateID";
             this.sbRateID.Size = new System.Drawing.Size(160, 21);
@@ -673,7 +750,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(5, 403);
+            this.label10.Location = new System.Drawing.Point(5, 454);
             this.label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(56, 13);
@@ -683,7 +760,7 @@
             // sbMoney5
             // 
             this.sbMoney5.FormattingEnabled = true;
-            this.sbMoney5.Location = new System.Drawing.Point(5, 369);
+            this.sbMoney5.Location = new System.Drawing.Point(5, 360);
             this.sbMoney5.Margin = new System.Windows.Forms.Padding(2);
             this.sbMoney5.Name = "sbMoney5";
             this.sbMoney5.Size = new System.Drawing.Size(160, 21);
@@ -702,7 +779,7 @@
             // sbMoney4
             // 
             this.sbMoney4.FormattingEnabled = true;
-            this.sbMoney4.Location = new System.Drawing.Point(5, 309);
+            this.sbMoney4.Location = new System.Drawing.Point(5, 300);
             this.sbMoney4.Margin = new System.Windows.Forms.Padding(2);
             this.sbMoney4.Name = "sbMoney4";
             this.sbMoney4.Size = new System.Drawing.Size(160, 21);
@@ -762,7 +839,7 @@
             this.groupBox4.Controls.Add(this.label13);
             this.groupBox4.Location = new System.Drawing.Point(829, 12);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(170, 588);
+            this.groupBox4.Size = new System.Drawing.Size(170, 462);
             this.groupBox4.TabIndex = 39;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Other";
@@ -908,9 +985,9 @@
             this.groupBox6.Controls.Add(this.label7);
             this.groupBox6.Controls.Add(this.cbStudentNo);
             this.groupBox6.Controls.Add(this.label6);
-            this.groupBox6.Location = new System.Drawing.Point(23, 275);
+            this.groupBox6.Location = new System.Drawing.Point(23, 182);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(170, 325);
+            this.groupBox6.Size = new System.Drawing.Size(170, 204);
             this.groupBox6.TabIndex = 39;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Global";
@@ -972,68 +1049,141 @@
             this.label6.TabIndex = 20;
             this.label6.Text = "Student No.：";
             // 
-            // tMonth
+            // label40
             // 
-            this.tMonth.FormattingEnabled = true;
-            this.tMonth.Location = new System.Drawing.Point(5, 547);
-            this.tMonth.Margin = new System.Windows.Forms.Padding(2);
-            this.tMonth.Name = "tMonth";
-            this.tMonth.Size = new System.Drawing.Size(160, 21);
-            this.tMonth.TabIndex = 27;
+            this.label40.AutoSize = true;
+            this.label40.Location = new System.Drawing.Point(5, 396);
+            this.label40.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(60, 13);
+            this.label40.TabIndex = 56;
+            this.label40.Text = "6 Money：";
             // 
-            // label37
+            // tMoney6
             // 
-            this.label37.AutoSize = true;
-            this.label37.Location = new System.Drawing.Point(5, 525);
-            this.label37.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(49, 13);
-            this.label37.TabIndex = 26;
-            this.label37.Text = "Month：";
+            this.tMoney6.FormattingEnabled = true;
+            this.tMoney6.Location = new System.Drawing.Point(5, 421);
+            this.tMoney6.Margin = new System.Windows.Forms.Padding(2);
+            this.tMoney6.Name = "tMoney6";
+            this.tMoney6.Size = new System.Drawing.Size(160, 21);
+            this.tMoney6.TabIndex = 55;
             // 
-            // mMonth
+            // label41
             // 
-            this.mMonth.FormattingEnabled = true;
-            this.mMonth.Location = new System.Drawing.Point(5, 547);
-            this.mMonth.Margin = new System.Windows.Forms.Padding(2);
-            this.mMonth.Name = "mMonth";
-            this.mMonth.Size = new System.Drawing.Size(160, 21);
-            this.mMonth.TabIndex = 55;
+            this.label41.AutoSize = true;
+            this.label41.Location = new System.Drawing.Point(5, 396);
+            this.label41.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(60, 13);
+            this.label41.TabIndex = 59;
+            this.label41.Text = "6 Money：";
             // 
-            // label38
+            // mMoney6
             // 
-            this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(5, 525);
-            this.label38.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label38.Name = "label38";
-            this.label38.Size = new System.Drawing.Size(49, 13);
-            this.label38.TabIndex = 57;
-            this.label38.Text = "Month：";
+            this.mMoney6.FormattingEnabled = true;
+            this.mMoney6.Location = new System.Drawing.Point(5, 421);
+            this.mMoney6.Margin = new System.Windows.Forms.Padding(2);
+            this.mMoney6.Name = "mMoney6";
+            this.mMoney6.Size = new System.Drawing.Size(160, 21);
+            this.mMoney6.TabIndex = 58;
             // 
-            // sbMonth
+            // label42
             // 
-            this.sbMonth.FormattingEnabled = true;
-            this.sbMonth.Location = new System.Drawing.Point(5, 547);
-            this.sbMonth.Margin = new System.Windows.Forms.Padding(2);
-            this.sbMonth.Name = "sbMonth";
-            this.sbMonth.Size = new System.Drawing.Size(160, 21);
-            this.sbMonth.TabIndex = 60;
+            this.label42.AutoSize = true;
+            this.label42.Location = new System.Drawing.Point(5, 396);
+            this.label42.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(60, 13);
+            this.label42.TabIndex = 62;
+            this.label42.Text = "6 Money：";
             // 
-            // label39
+            // sbMoney6
             // 
-            this.label39.AutoSize = true;
-            this.label39.Location = new System.Drawing.Point(2, 525);
-            this.label39.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label39.Name = "label39";
-            this.label39.Size = new System.Drawing.Size(49, 13);
-            this.label39.TabIndex = 59;
-            this.label39.Text = "Month：";
+            this.sbMoney6.FormattingEnabled = true;
+            this.sbMoney6.Location = new System.Drawing.Point(5, 421);
+            this.sbMoney6.Margin = new System.Windows.Forms.Padding(2);
+            this.sbMoney6.Name = "sbMoney6";
+            this.sbMoney6.Size = new System.Drawing.Size(160, 21);
+            this.sbMoney6.TabIndex = 61;
+            // 
+            // groupBox7
+            // 
+            this.groupBox7.Controls.Add(this.DiscountType);
+            this.groupBox7.Controls.Add(this.label43);
+            this.groupBox7.Controls.Add(this.DiscountMoney);
+            this.groupBox7.Controls.Add(this.lblDiscountMoney);
+            this.groupBox7.Controls.Add(this.DiscountId);
+            this.groupBox7.Controls.Add(this.label45);
+            this.groupBox7.Location = new System.Drawing.Point(23, 406);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(170, 236);
+            this.groupBox7.TabIndex = 40;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "Tuition";
+            // 
+            // DiscountMoney
+            // 
+            this.DiscountMoney.FormattingEnabled = true;
+            this.DiscountMoney.Location = new System.Drawing.Point(5, 110);
+            this.DiscountMoney.Margin = new System.Windows.Forms.Padding(2);
+            this.DiscountMoney.Name = "DiscountMoney";
+            this.DiscountMoney.Size = new System.Drawing.Size(160, 21);
+            this.DiscountMoney.TabIndex = 25;
+            // 
+            // lblDiscountMoney
+            // 
+            this.lblDiscountMoney.AutoSize = true;
+            this.lblDiscountMoney.Location = new System.Drawing.Point(2, 85);
+            this.lblDiscountMoney.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblDiscountMoney.Name = "lblDiscountMoney";
+            this.lblDiscountMoney.Size = new System.Drawing.Size(96, 13);
+            this.lblDiscountMoney.TabIndex = 24;
+            this.lblDiscountMoney.Text = "Discount Money：";
+            // 
+            // DiscountId
+            // 
+            this.DiscountId.FormattingEnabled = true;
+            this.DiscountId.Location = new System.Drawing.Point(5, 46);
+            this.DiscountId.Margin = new System.Windows.Forms.Padding(2);
+            this.DiscountId.Name = "DiscountId";
+            this.DiscountId.Size = new System.Drawing.Size(160, 21);
+            this.DiscountId.TabIndex = 21;
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Location = new System.Drawing.Point(2, 21);
+            this.label45.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(70, 13);
+            this.label45.TabIndex = 20;
+            this.label45.Text = "DiscountId：";
+            // 
+            // DiscountType
+            // 
+            this.DiscountType.FormattingEnabled = true;
+            this.DiscountType.Location = new System.Drawing.Point(5, 174);
+            this.DiscountType.Margin = new System.Windows.Forms.Padding(2);
+            this.DiscountType.Name = "DiscountType";
+            this.DiscountType.Size = new System.Drawing.Size(160, 21);
+            this.DiscountType.TabIndex = 27;
+            // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.Location = new System.Drawing.Point(2, 149);
+            this.label43.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(88, 13);
+            this.label43.TabIndex = 26;
+            this.label43.Text = "Discount Type：";
             // 
             // frmImportFinanceForShangHai
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1011, 654);
+            this.ClientSize = new System.Drawing.Size(1011, 656);
+            this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
@@ -1057,6 +1207,8 @@
             this.groupBox4.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1150,5 +1302,18 @@
         private System.Windows.Forms.ComboBox mMonth;
         private System.Windows.Forms.ComboBox sbMonth;
         private System.Windows.Forms.Label label39;
+        private System.Windows.Forms.Label label40;
+        private System.Windows.Forms.ComboBox tMoney6;
+        private System.Windows.Forms.Label label41;
+        private System.Windows.Forms.ComboBox mMoney6;
+        private System.Windows.Forms.Label label42;
+        private System.Windows.Forms.ComboBox sbMoney6;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private System.Windows.Forms.ComboBox DiscountMoney;
+        private System.Windows.Forms.Label lblDiscountMoney;
+        private System.Windows.Forms.ComboBox DiscountId;
+        private System.Windows.Forms.Label label45;
+        private System.Windows.Forms.ComboBox DiscountType;
+        private System.Windows.Forms.Label label43;
     }
 }

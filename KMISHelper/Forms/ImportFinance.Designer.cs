@@ -86,6 +86,10 @@
             this.btnPreImport = new System.Windows.Forms.Button();
             this.btnImport = new System.Windows.Forms.Button();
             this.btnCharge = new System.Windows.Forms.Button();
+            this.btnChargeUpload = new System.Windows.Forms.Button();
+            this.btnUpdateRef = new System.Windows.Forms.Button();
+            this.lblInfo = new System.Windows.Forms.Label();
+            this.btnDelete = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -654,7 +658,7 @@
             // 
             // btnUpload
             // 
-            this.btnUpload.Location = new System.Drawing.Point(573, 550);
+            this.btnUpload.Location = new System.Drawing.Point(696, 550);
             this.btnUpload.Margin = new System.Windows.Forms.Padding(2);
             this.btnUpload.Name = "btnUpload";
             this.btnUpload.Size = new System.Drawing.Size(94, 28);
@@ -665,7 +669,8 @@
             // 
             // btnPreImport
             // 
-            this.btnPreImport.Location = new System.Drawing.Point(686, 550);
+            this.btnPreImport.Enabled = false;
+            this.btnPreImport.Location = new System.Drawing.Point(801, 550);
             this.btnPreImport.Margin = new System.Windows.Forms.Padding(2);
             this.btnPreImport.Name = "btnPreImport";
             this.btnPreImport.Size = new System.Drawing.Size(94, 28);
@@ -676,6 +681,7 @@
             // 
             // btnImport
             // 
+            this.btnImport.Enabled = false;
             this.btnImport.Location = new System.Drawing.Point(905, 550);
             this.btnImport.Margin = new System.Windows.Forms.Padding(2);
             this.btnImport.Name = "btnImport";
@@ -687,7 +693,8 @@
             // 
             // btnCharge
             // 
-            this.btnCharge.Location = new System.Drawing.Point(797, 550);
+            this.btnCharge.Enabled = false;
+            this.btnCharge.Location = new System.Drawing.Point(118, 550);
             this.btnCharge.Margin = new System.Windows.Forms.Padding(2);
             this.btnCharge.Name = "btnCharge";
             this.btnCharge.Size = new System.Drawing.Size(94, 28);
@@ -696,11 +703,57 @@
             this.btnCharge.UseVisualStyleBackColor = true;
             this.btnCharge.Click += new System.EventHandler(this.btnCharge_Click);
             // 
+            // btnChargeUpload
+            // 
+            this.btnChargeUpload.Location = new System.Drawing.Point(11, 550);
+            this.btnChargeUpload.Margin = new System.Windows.Forms.Padding(2);
+            this.btnChargeUpload.Name = "btnChargeUpload";
+            this.btnChargeUpload.Size = new System.Drawing.Size(94, 28);
+            this.btnChargeUpload.TabIndex = 36;
+            this.btnChargeUpload.Text = "Charge Upload";
+            this.btnChargeUpload.UseVisualStyleBackColor = true;
+            this.btnChargeUpload.Click += new System.EventHandler(this.btnChargeUpload_Click);
+            // 
+            // btnUpdateRef
+            // 
+            this.btnUpdateRef.Enabled = false;
+            this.btnUpdateRef.Location = new System.Drawing.Point(436, 550);
+            this.btnUpdateRef.Margin = new System.Windows.Forms.Padding(2);
+            this.btnUpdateRef.Name = "btnUpdateRef";
+            this.btnUpdateRef.Size = new System.Drawing.Size(94, 28);
+            this.btnUpdateRef.TabIndex = 37;
+            this.btnUpdateRef.Text = "Update Ref";
+            this.btnUpdateRef.UseVisualStyleBackColor = true;
+            this.btnUpdateRef.Click += new System.EventHandler(this.btnUpdateRef_Click);
+            // 
+            // lblInfo
+            // 
+            this.lblInfo.AutoSize = true;
+            this.lblInfo.Location = new System.Drawing.Point(221, 558);
+            this.lblInfo.Name = "lblInfo";
+            this.lblInfo.Size = new System.Drawing.Size(0, 13);
+            this.lblInfo.TabIndex = 38;
+            // 
+            // btnDelete
+            // 
+            this.btnDelete.Location = new System.Drawing.Point(567, 550);
+            this.btnDelete.Margin = new System.Windows.Forms.Padding(2);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(94, 28);
+            this.btnDelete.TabIndex = 39;
+            this.btnDelete.Text = "Delete Bill";
+            this.btnDelete.UseVisualStyleBackColor = true;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            // 
             // ImportFinance
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1011, 586);
+            this.Controls.Add(this.btnDelete);
+            this.Controls.Add(this.lblInfo);
+            this.Controls.Add(this.btnUpdateRef);
+            this.Controls.Add(this.btnChargeUpload);
             this.Controls.Add(this.btnCharge);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.btnImport);
@@ -726,6 +779,7 @@
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -789,5 +843,9 @@
         private System.Windows.Forms.ComboBox cbscMonth;
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.Button btnCharge;
+        private System.Windows.Forms.Button btnChargeUpload;
+        private System.Windows.Forms.Button btnUpdateRef;
+        private System.Windows.Forms.Label lblInfo;
+        private System.Windows.Forms.Button btnDelete;
     }
 }

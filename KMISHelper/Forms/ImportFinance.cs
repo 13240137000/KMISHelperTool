@@ -36,8 +36,12 @@ namespace KMISHelper.Forms
 
         private bool IsTry2Import = false;
 
+        private string SheetName = BznsBase.ImportAllFinanceSheetName;
+
         private void btnUpload_Click(object sender, EventArgs e)
         {
+
+            SheetName = BznsBase.ImportAllFinanceSheetName;
 
             OpenFileDialog of = new OpenFileDialog();
             of.Title = "Upload Finance";
@@ -53,38 +57,39 @@ namespace KMISHelper.Forms
 
             }
 
+            btnPreImport.Enabled = true;
+            btnImport.Enabled = true;
+
         }
 
         private void LoadPlans(string FileName)
         {
-            Students = ExcelHelper.ExcelHelper.Import(FileName, BznsBase.ImportFinanceSheetName);
+            Students = ExcelHelper.ExcelHelper.Import(FileName, SheetName);
         }
 
-        private void LoadField(string FileName) {
+        private void LoadField(string FileName)
+        {
 
             // Load Plan
 
-            cbStudentNo.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName,BznsBase.ImportFinanceSheetName);
+            cbStudentNo.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbStudentNo.DisplayMember = "Value";
             cbStudentNo.ValueMember = "Key";
 
-            //cbStudentNo.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
-            //cbStudentNo.DisplayMember = "Value";
-            //cbStudentNo.ValueMember = "Key";
-
-            cbYear.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbYear.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbYear.DisplayMember = "Value";
             cbYear.ValueMember = "Key";
 
-            cbMonth.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbMonth.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbMonth.DisplayMember = "Value";
             cbMonth.ValueMember = "Key";
 
-            cbBillStartDate.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbBillStartDate.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbBillStartDate.DisplayMember = "Value";
             cbBillStartDate.ValueMember = "Key";
 
-            if (BznsBase.EnableMappingField) {
+            if (BznsBase.EnableMappingField)
+            {
                 cbStudentNo.Text = "学号";
                 cbYear.Text = "学年";
                 cbMonth.Text = "月份数";
@@ -93,23 +98,23 @@ namespace KMISHelper.Forms
 
             // Load Tuition Fee
 
-            cbtfPaymentMethod.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbtfPaymentMethod.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbtfPaymentMethod.DisplayMember = "Value";
             cbtfPaymentMethod.ValueMember = "Key";
 
-            cbtfTuitionFeeMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbtfTuitionFeeMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbtfTuitionFeeMoney.DisplayMember = "Value";
             cbtfTuitionFeeMoney.ValueMember = "Key";
 
-            cbtfDiscountMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbtfDiscountMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbtfDiscountMoney.DisplayMember = "Value";
             cbtfDiscountMoney.ValueMember = "Key";
 
-            cbDiscountName.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbDiscountName.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbDiscountName.DisplayMember = "Value";
             cbDiscountName.ValueMember = "Key";
 
-            cbtfStartDate.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbtfStartDate.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbtfStartDate.DisplayMember = "Value";
             cbtfStartDate.ValueMember = "Key";
 
@@ -124,29 +129,31 @@ namespace KMISHelper.Forms
 
             // Load Per Tuition Fee
 
-            cbptfmPerTuitionFeeMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbptfmPerTuitionFeeMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbptfmPerTuitionFeeMoney.DisplayMember = "Value";
             cbptfmPerTuitionFeeMoney.ValueMember = "Key";
 
-            if (BznsBase.EnableMappingField) {
+            if (BznsBase.EnableMappingField)
+            {
                 cbptfmPerTuitionFeeMoney.Text = "预交学费";
             }
 
             // Meals Fee 
 
-            cbmfMethod.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbmfMethod.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbmfMethod.DisplayMember = "Value";
             cbmfMethod.ValueMember = "Key";
 
-            cbmfMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbmfMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbmfMoney.DisplayMember = "Value";
             cbmfMoney.ValueMember = "Key";
 
-            cbmfStartDate.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbmfStartDate.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbmfStartDate.DisplayMember = "Value";
             cbmfStartDate.ValueMember = "Key";
 
-            if (BznsBase.EnableMappingField) {
+            if (BznsBase.EnableMappingField)
+            {
                 cbmfMethod.Text = "缴费方式";
                 cbmfMoney.Text = "餐费标准";
                 cbmfStartDate.Text = "入园时间";
@@ -154,23 +161,24 @@ namespace KMISHelper.Forms
 
             // School Car
 
-            cbscMethod.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbscMethod.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbscMethod.DisplayMember = "Value";
             cbscMethod.ValueMember = "Key";
 
-            cbscMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbscMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbscMoney.DisplayMember = "Value";
             cbscMoney.ValueMember = "Key";
 
-            cbscStartDate.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbscStartDate.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbscStartDate.DisplayMember = "Value";
             cbscStartDate.ValueMember = "Key";
 
-            cbscMonth.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbscMonth.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbscMonth.DisplayMember = "Value";
             cbscMonth.ValueMember = "Key";
 
-            if (BznsBase.EnableMappingField) {
+            if (BznsBase.EnableMappingField)
+            {
                 cbscMethod.Text = "缴费方式";
                 cbscMoney.Text = "车费标准";
                 cbscStartDate.Text = "校车时间";
@@ -179,35 +187,36 @@ namespace KMISHelper.Forms
 
             // Once Fee
 
-            cbofMoney1.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbofMoney1.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbofMoney1.DisplayMember = "Value";
             cbofMoney1.ValueMember = "Key";
 
-            cbofMoney2.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbofMoney2.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbofMoney2.DisplayMember = "Value";
             cbofMoney2.ValueMember = "Key";
 
-            cbofMoney3.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbofMoney3.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbofMoney3.DisplayMember = "Value";
             cbofMoney3.ValueMember = "Key";
 
-            cbofMoney4.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbofMoney4.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbofMoney4.DisplayMember = "Value";
             cbofMoney4.ValueMember = "Key";
 
-            cbofMoney5.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbofMoney5.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbofMoney5.DisplayMember = "Value";
             cbofMoney5.ValueMember = "Key";
 
-            cbofMoney6.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbofMoney6.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbofMoney6.DisplayMember = "Value";
             cbofMoney6.ValueMember = "Key";
 
-            cbofMoney7.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportFinanceSheetName);
+            cbofMoney7.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, SheetName);
             cbofMoney7.DisplayMember = "Value";
             cbofMoney7.ValueMember = "Key";
 
-            if (BznsBase.EnableMappingField) {
+            if (BznsBase.EnableMappingField)
+            {
                 cbofMoney1.Text = "校服费";
                 cbofMoney2.Text = "被褥费";
                 cbofMoney3.Text = "书本费";
@@ -261,7 +270,8 @@ namespace KMISHelper.Forms
             try
             {
 
-                if (BillStartDatePos == -1) {
+                if (BillStartDatePos == -1)
+                {
                     Message = "Please select your bill start date.";
                     return;
                 }
@@ -284,8 +294,9 @@ namespace KMISHelper.Forms
                     return;
                 }
 
-                if (ofMoney1Pos != -1) {
-                    ofs.Add(new OnceInfo() { Key = ofMoney1Pos,Value = cbofMoney1.Text.Trim()});
+                if (ofMoney1Pos != -1)
+                {
+                    ofs.Add(new OnceInfo() { Key = ofMoney1Pos, Value = cbofMoney1.Text.Trim() });
                 }
 
                 if (ofMoney2Pos != -1)
@@ -320,15 +331,21 @@ namespace KMISHelper.Forms
 
                 if (IsCharge)
                 {
+                    btnCharge.Text = "Working";
                     Result = GetFinanceInstance().ChargeInsert(Students, StudentNoPos, false);
                 }
-                else {
+                else
+                {
 
+                    btnImport.Text = "Working Bill";
+                    lblInfo.Text = "We are start handle bill";
                     Result = GetFinanceInstance().BillInsert(Students, StudentNoPos, YearTitlePos, MonthPos, BillStartDatePos, PaymentMethodPos, TuitionFeeMoneyPos, DiscountMoneyPos, DiscountNamePos, StartDatePos, PerTuitionFeeMoneyPos, mfMethodPos, mfMoneyPos, mfStartDatePos, scMethodPos, scMoneyPos, scMonthPos, scStartDatePos, ofs, IsTry2Import);
 
 
                     if (Result && !IsTry2Import)
                     {
+                        btnImport.Text = "Working Charge";
+                        lblInfo.Text = "We are start handle charge";
                         Result = GetFinanceInstance().ChargeInsert(Students, StudentNoPos, false);
                     }
                     else
@@ -360,6 +377,8 @@ namespace KMISHelper.Forms
                 btnImport.Enabled = true;
                 MessageBox.Show(Message);
                 IsCharge = false;
+                btnCharge.Text = "Charge";
+                btnImport.Text = "Import";
             }
 
         }
@@ -372,8 +391,104 @@ namespace KMISHelper.Forms
 
         private void btnCharge_Click(object sender, EventArgs e)
         {
+            
             IsCharge = true;
             btnImport_Click(null, null);
+        }
+
+        private void btnChargeUpload_Click(object sender, EventArgs e)
+        {
+
+            SheetName = BznsBase.ImportFinanceSheetName;
+
+            OpenFileDialog of = new OpenFileDialog();
+            of.Title = "Upload Finance";
+            of.InitialDirectory = @BznsBase.InitialDirectory;
+            of.Filter = "Excel Files(.xls)| *.xls";
+            of.FilterIndex = 2;
+
+            of.RestoreDirectory = true;
+            if (of.ShowDialog() == DialogResult.OK)
+            {
+                LoadField(of.FileName);
+                LoadPlans(of.FileName);
+
+            }
+
+            btnCharge.Enabled = true;
+
+        }
+
+        private void btnUpdateRef_Click(object sender, EventArgs e)
+        {
+            var ret = false;
+            var Message = "Import Finance Successfully!";
+            List<string> klist = new List<string>();
+            try
+            {
+                //klist.Add("2d5978e7b68e4bc18e9e9fb66d754415");
+                //klist.Add("138f784f0a494659b6493858a41ce228");
+                //klist.Add("cd58bb66d95745f3b2b2b994cc821bbd");
+                //klist.Add("340c2ffea711495d9c94ee11006fe717");
+                //klist.Add("373ee893648c4b278205d13c56a4434d");
+                //klist.Add("0bda279894da4078b79a5831ad6e3b8d");
+                //klist.Add("92adbe329feb4251a9661985c4973030");
+                //klist.Add("1c7c2fd51fc448e5a54464bbd0365308");
+                //klist.Add("05465f4e349a4d50a9892b392a1b6d9c");
+                //klist.Add("9d966f0ff6a44425b9be13b1c75fc38b");
+                //klist.Add("f831fd95e99f4dc8a4a08bf2e8b27403");
+                //klist.Add("6867efbfbb584dea9d839e613d3b3f0e");
+                //klist.Add("0d29d33cc402442eb96fad1e17a9f200");
+                //klist.Add("d1be1ee261c54503b6fb4e5697234e2b");
+                //klist.Add("91b26c6d064748e58c80e06e6fd1654f");
+                //klist.Add("68a677d6d544484a970ab4b675eb8034");
+                //klist.Add("37ff79655ecc4835b35a8cfce085db81");
+                //klist.Add("60e8d2c4fafd4e5f847c33c1c7bb904f");
+                //klist.Add("91d27a68778747a58a87d2e89dc08c07");
+                //klist.Add("cdf1c832748f4a2f862c7d2ff6991b32");
+                //klist.Add("b0d01d47e3b945c19f95c5cec00e05e7");
+                //klist.Add("7c53bd48a95044678c8241f084cfb007");
+                //klist.Add("3e93099280a84f73a3218b3ec7887193");
+                //klist.Add("f890fa0a226c45cc8027d7b5d7ad1d30");
+                //klist.Add("f185358dfdde456184d4a1a5be79b811");
+                //klist.Add("d8f72097a61d48f0a2f77be94551789d");
+                //klist.Add("0f40dbdc71a44b1c80e96d57134810f0");
+                //klist.Add("13aa302e8ba640f59f82905b18b6b9d3");
+                //klist.Add("e56cc807335241a3aa1de4a295f71700");
+                //klist.Add("5470d7ee18234a919f279a45bdec21cf");
+                ret = GetFinanceInstance().UpdateRef(klist);
+            }
+            catch (Exception)
+            {
+
+                Message = "update ref failer.";
+            }
+            finally
+            {
+                MessageBox.Show(Message);
+            }
+
+
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            var ret = false;
+            var Message = "Delete Finance Successfully!";
+            try
+            {
+                
+                ret = GetFinanceInstance().DeleteData();
+            }
+            catch (Exception)
+            {
+
+                Message = "Delete Data failer.";
+            }
+            finally
+            {
+                MessageBox.Show(Message);
+            }
         }
     }
 }

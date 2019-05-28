@@ -28,6 +28,9 @@ namespace KMISHelper.Business
             var DescAlias = string.Empty;
             var DescMonthlyPrice = new decimal(0);
             var sno = string.Empty;
+            
+            var StudentPaymentPlanInfo = new StudentPaymentPlanInfo();
+            var SAInfo = new ExistAccountInfo();
 
             using (MySqlConnection conn = new MySqlConnection(BznsBase.GetConnectionString))
             {
@@ -44,7 +47,6 @@ namespace KMISHelper.Business
 
                         var DescBuilder = new StringBuilder().Clear();
                         var StudentNo = StudentNoPos == -1 ? string.Empty : dr[StudentNoPos].ToString();
-                        Write(StudentNo);
                         var ClassId = string.Empty;
                         var StudentId = string.Empty;
                         var myClassInfo = new ClassInfo();
@@ -55,8 +57,11 @@ namespace KMISHelper.Business
                         var BillID = string.Empty;
                         var BillMonth = DateTime.Now.ToString("yyyy-MM");
                         List<string> ofm = new List<string>();
+                        var IsAppend = false;
 
                         // Get StudentID and ClassID 
+
+                        Write(StudentNo, " start handle this student no.",KindergartenId);
 
                         Sql = string.Format(InitObject.GetScriptServiceInstance().GetClassIDByStudentID, StudentNo);
                         dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
@@ -68,6 +73,12 @@ namespace KMISHelper.Business
                                 ClassId = row["class_id"].ToString();
                                 StudentId = row["stu_id"].ToString();
                             }
+                        }
+
+                        if (string.IsNullOrEmpty(StudentId))
+                        {
+                            WriteForManual(StudentNo, " not found in db.",KindergartenId);
+                            continue;
                         }
 
                         // Get Class Info
@@ -96,25 +107,110 @@ namespace KMISHelper.Business
                         // Get Monthly Info
 
                         var BillStartDate = Convert.ToDateTime(dr[BillStartDatePos]);
+                        var BillStartEndDate = BillStartDate.AddMonths(Convert.ToInt32(dr[MonthPos]));
+
                         var MonthDict = new Dictionary<string, MonthInfo>();
                         MonthDict = InitObject.SplitMonth(BillStartDate, Convert.ToInt32(dr[MonthPos]), myClassInfo.CalendarId, myYearInfo.YearID);
 
 
-                        // this method need add condition 
-                        // Insert Into Payment Plan
+                        // Is exist student payment plan?
+
+                        SAInfo = GetStudentAllAccount(StudentId);
+                        StudentPaymentPlanInfo = GetStudentPaymentPlanInfoBySID(StudentId);
+
+                        if (!string.IsNullOrEmpty(StudentPaymentPlanInfo.student_payment_id))
+                        {
+                            IsAppend = true;
+                        }
+                        else {
+                            IsAppend = false;
+                        }
+
+                        // insert into student payment plan.
 
                         if (!string.IsNullOrEmpty(StudentId))
                         {
-                            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPayment, StudentPaymentId, StudentId, ClassId, KindergartenId, myClassInfo.ClassType, "Y", UserID, CreateDate);
-                            PaymentResult = DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+                            if (IsAppend)
+                            {
+
+                                PaymentResult = 1;
+                                StudentPaymentId = StudentPaymentPlanInfo.student_payment_id;
+
+                                // Is throw an error log?
+
+                                var MoneyFromTuition = TuitionFeeMoneyPos == -1 ? string.Empty : dr[TuitionFeeMoneyPos].ToString();
+                                var MoneyFromMeals = mfMoneyPos == -1 ? string.Empty : dr[mfMoneyPos].ToString();
+                                var MoneyFromSchoolBus = scMoneyPos == -1 ? string.Empty : dr[scMoneyPos].ToString();
+                                var RefInfo = new StudentPaymentPlanRefInfo();
+                                var IsHaveTuitionPlan = false;
+                                var IsHaveMealsPlan = false;
+                                var IsHaveSchoolBusPlan = false;
+
+
+                                if (!string.IsNullOrEmpty(MoneyFromTuition) && Convert.ToDecimal(MoneyFromTuition) > 0)
+                                {
+
+                                    RefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT01");
+
+                                    if (!string.IsNullOrEmpty(RefInfo.id))
+                                    {
+                                        IsHaveTuitionPlan = IsExistBillPlan("PAYMENTSUBJECT01", BillStartDate.ToString("yyyy-MM-dd"), BillStartEndDate.ToString("yyyy-MM-dd"), RefInfo.id);
+                                        if (IsHaveTuitionPlan)
+                                        {
+                                            WriteForManual(StudentNo, " PAYMENTSUBJECT01",KindergartenId);
+                                            continue;
+                                        }
+                                    }
+
+                                }
+
+                                if (!string.IsNullOrEmpty(MoneyFromMeals) && Convert.ToDecimal(MoneyFromMeals) > 0)
+                                {
+
+                                    RefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT02");
+
+                                    if (!string.IsNullOrEmpty(RefInfo.id))
+                                    {
+                                        IsHaveMealsPlan = IsExistBillPlan("PAYMENTSUBJECT02", BillStartDate.ToString("yyyy-MM-dd"), BillStartEndDate.ToString("yyyy-MM-dd"), RefInfo.id);
+                                        if (IsHaveMealsPlan)
+                                        {
+                                            WriteForManual(StudentNo, " PAYMENTSUBJECT02",KindergartenId);
+                                            continue;
+                                        }
+                                    }
+
+                                }
+
+                                if (!string.IsNullOrEmpty(MoneyFromSchoolBus) && Convert.ToDecimal(MoneyFromSchoolBus) > 0)
+                                {
+
+                                    RefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT04");
+
+                                    if (!string.IsNullOrEmpty(RefInfo.id))
+                                    {
+                                        IsHaveSchoolBusPlan = IsExistBillPlan("PAYMENTSUBJECT04", BillStartDate.ToString("yyyy-MM-dd"), BillStartEndDate.ToString("yyyy-MM-dd"), RefInfo.id);
+                                        if (IsHaveSchoolBusPlan)
+                                        {
+                                            WriteForManual(StudentNo, " PAYMENTSUBJECT04",KindergartenId);
+                                            continue;
+                                        }
+                                    }
+
+                                }
+
+                            }
+                            else
+                            {
+                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPayment, StudentPaymentId, StudentId, ClassId, KindergartenId, myClassInfo.ClassType, "Y", UserID, CreateDate);
+                                PaymentResult = DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+                            }
+
                         }
                         else
                         {
                             SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, "not found the student no."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Student Payment")));
                         }
 
-                        // this method need add condition
-                        // Insert into fin bill
 
                         if (PaymentResult > 0)
                         {
@@ -134,7 +230,11 @@ namespace KMISHelper.Business
                         }
 
 
+                        //--------------------------------------------------------------------------------------------------------------------------
                         // Insert Into PaymentPlanRef - Tuition Fee 
+                        //--------------------------------------------------------------------------------------------------------------------------
+
+                        #region "Insert Tuition"
 
                         var PaymentMethod = PaymentMethodPos == -1 ? string.Empty : InitObject.GetPaymentModeByName(dr[PaymentMethodPos].ToString());
                         var TuitionFeeMoney = TuitionFeeMoneyPos == -1 ? string.Empty : dr[TuitionFeeMoneyPos].ToString();
@@ -148,6 +248,19 @@ namespace KMISHelper.Business
                         var DetailID = InitObject.GetUUID();
                         var BatchNo = InitObject.GetSysDate(true);
                         var DiscountedMoney = new decimal(0);
+                        var IsExistTuition = false;
+                        var TuitionRefInfo = new StudentPaymentPlanRefInfo();
+
+
+                        // Is exist ref
+
+                        TuitionRefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT01");
+
+                        if (!string.IsNullOrEmpty(TuitionRefInfo.id))
+                        {
+                            IsExistTuition = true;
+                            DetailID = TuitionRefInfo.id;
+                        }
 
                         // Get RateId
                         if (!string.IsNullOrEmpty(TuitionFeeMoney) && Convert.ToDecimal(TuitionFeeMoney) > 0)
@@ -164,6 +277,48 @@ namespace KMISHelper.Business
                                     DescMonthlyPrice = Convert.ToDecimal(row["rates_monthly"]);
                                 }
                             }
+
+
+                            if (!IsExistTuition && dt.Rows.Count <= 0)
+                            {
+
+                                Sql = string.Format(InitObject.GetScriptServiceInstance().GetRandRateIdByKMS, TuitionFeeSubject, KindergartenId, myYearInfo.YearID);
+                                dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
+
+
+                                if (dt.Rows.Count <= 0)
+                                {
+                                    if (!string.IsNullOrEmpty(DiscountName.Trim()))
+                                    {
+                                        WriteForManual(StudentNo, string.Format(" not found Tuition rates subject:'{0}',name:'{1}'", TuitionFeeSubject, DiscountName),KindergartenId);
+                                    }
+                                    else
+                                    {
+                                        WriteForManual(StudentNo, string.Format(" not found Tuition rates subject:'{0}',money:'{1}'", TuitionFeeSubject, (Convert.ToDecimal(TuitionFeeMoney) - Convert.ToDecimal(DiscountMoney))),KindergartenId);
+                                    }
+                                }
+                                else
+                                {
+                                    foreach (DataRow row in dt.Rows)
+                                    {
+                                        RateId = row["rates_id"].ToString();
+                                        DescAlias = row["rates_alias"].ToString();
+                                        DescMonthlyPrice = Convert.ToDecimal(row["rates_monthly"]);
+                                    }
+
+                                }
+
+                            }
+
+
+                            if (!string.IsNullOrEmpty(TuitionRefInfo.id))
+                            {
+                                var RatesInfo = GetRatesInfoByID(TuitionRefInfo.rates_id);
+                                RateId = RatesInfo.rates_id;
+                                DescAlias = RatesInfo.rates_alias;
+                                DescMonthlyPrice = RatesInfo.rates_monthly;
+                            }
+
                         }
 
                         // Get DiscountID and DiscountType
@@ -190,28 +345,46 @@ namespace KMISHelper.Business
                                     DiscountType = row["discount_type"].ToString();
                                 }
                             }
+
+                            if (!string.IsNullOrEmpty(TuitionRefInfo.id))
+                            {
+                                DiscountID = TuitionRefInfo.pay_discount_id;
+                                DiscountType = TuitionRefInfo.payment_discount;
+                            }
+
                             DiscountedMoney = Convert.ToDecimal(TuitionFeeMoney) - Convert.ToDecimal(DiscountMoney);
+
                         }
+
 
                         // Insert into Tuition
 
                         if (!string.IsNullOrEmpty(TuitionFeeMoney) && Convert.ToDecimal(TuitionFeeMoney) > 0 && !string.IsNullOrEmpty(RateId) && PaymentResult > 0 && BillResult > 0)
                         {
-                            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, DetailID, RateId, BatchNo, StudentPaymentId, PaymentMethod, TuitionFeeSubject, Convert.ToDecimal(TuitionFeeMoney), DiscountID, DiscountType, DiscountMoney, 0, 1, UserID, CreateDate, StartDate, DiscountedMoney);
-                            DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
-                            DescBuilder.Append(string.Format("【学费: {0}/月 ，缴费方式:{1}，标准:{2} 】", DescMonthlyPrice, dr[PaymentMethodPos].ToString(), DescAlias));
+
+
+                            if (!IsExistTuition)
+                            {
+                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, DetailID, RateId, BatchNo, StudentPaymentId, PaymentMethod, TuitionFeeSubject, Convert.ToDecimal(TuitionFeeMoney), DiscountID, DiscountType, DiscountMoney, 0, 1, UserID, CreateDate, StartDate, DiscountedMoney);
+                                DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+                                DescBuilder.Append(string.Format("【学费: {0}/月 ，缴费方式:{1}，标准:{2} 】", DescMonthlyPrice, dr[PaymentMethodPos].ToString(), DescAlias));
+                            }
+
 
                             // Insert into bill ref
+
                             var BillRefId = InitObject.GetUUID();
                             var BillNo = InitObject.GetBillNo(StartDate, TuitionFeeSubject);
                             var BillStatus = "PAYMENTSTATE01";
 
                             var tbStartDate = Convert.ToDateTime(dr[StartDatePos]);
                             var tbMonthDict = new Dictionary<string, MonthInfo>();
+
                             MonthDict = InitObject.SplitMonth(tbStartDate, Convert.ToInt32(dr[MonthPos]), myClassInfo.CalendarId, myYearInfo.YearID);
 
                             var tbsd = MonthDict["summary"].StartDate.ToString("yyyy-MM-dd");
                             var tbed = MonthDict["summary"].EndDate.ToString("yyyy-MM-dd");
+
                             var tbMoney = new decimal(0);
 
                             if (DiscountMoneyPos != -1)
@@ -224,6 +397,7 @@ namespace KMISHelper.Business
                             }
 
                             Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRef, BillRefId, BillID, TuitionFeeSubject, BillNo, DetailID, BillMonth, BillStatus, CreateDate, tbsd, tbed, tbMoney);
+
                             if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
                             {
                                 SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill ref insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Ref Tuition Fee")));
@@ -288,72 +462,33 @@ namespace KMISHelper.Business
                             SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " create discount approve log failed."), SysLogType.ERROR, string.Concat(ModuleName, " - ", "Discount Log")));
                         }
 
+
+                        #endregion
+
+
+                        //--------------------------------------------------------------------------------------------------------
                         // Insert Per Tuition Fee
+                        //--------------------------------------------------------------------------------------------------------
+
+
+                        #region "Insert Per Tuition"
 
                         var PerTuitionFeeMoney = PerTuitionFeeMoneyPos == -1 ? string.Empty : dr[PerTuitionFeeMoneyPos].ToString();
-                        var PerRateID = string.Empty;
-                        var PerDescAlias = string.Empty;
-                        var PerDescMonthlyPrice = new decimal(0);
                         var PerTuitionFeeSubject = "PAYMENTSUBJECT05";
-                        var PerDetailID = InitObject.GetUUID();
 
                         if (!string.IsNullOrEmpty(PerTuitionFeeMoney) && Convert.ToDecimal(PerTuitionFeeMoney) > 0 && PaymentResult > 0 && BillResult > 0)
                         {
-                            Sql = string.Format(InitObject.GetScriptServiceInstance().GetRateIdByKMS, Convert.ToDecimal(PerTuitionFeeMoney), PerTuitionFeeSubject, KindergartenId, myYearInfo.YearID);
-                            dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
 
-                            if (dt.Rows.Count == 0)
+                            var BillRefId = InitObject.GetUUID();
+                            var BillNo = InitObject.GetBillNo(CreateDate, PerTuitionFeeSubject);
+                            var BillStatus = "PAYMENTSTATE01";
+
+                            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRefNoInit, BillRefId, BillID, PerTuitionFeeSubject, BillNo, string.Empty, BillMonth, BillStatus, CreateDate, Convert.ToDecimal(PerTuitionFeeMoney));
+
+                            if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
                             {
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().GetRateIdByKS, PerTuitionFeeSubject, KindergartenId, myYearInfo.YearID);
-                                dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
+                                SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill ref insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Per Tuition Fee")));
                             }
-
-                            if (dt.Rows.Count >= 1)
-                            {
-                                foreach (DataRow row in dt.Rows)
-                                {
-                                    PerRateID = row["rates_id"].ToString();
-                                    PerDescAlias = row["rates_alias"].ToString();
-                                    PerDescMonthlyPrice = Convert.ToDecimal(row["rates_monthly"]);
-                                }
-                            }
-
-
-                            if (!string.IsNullOrEmpty(PerRateID) && PaymentResult > 0)
-                            {
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, PerDetailID, PerRateID, BatchNo, StudentPaymentId, "", PerTuitionFeeSubject, Convert.ToDecimal(PerTuitionFeeMoney), "", "", 0, 0, 1, UserID, CreateDate, CreateDate, 0);
-                                DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
-                                DescBuilder.Append(string.Format("【预缴学费: {0} ，标准:{1} 】", PerDescMonthlyPrice, DescAlias));
-
-                                // Insert into bill ref.
-                                var BillRefId = InitObject.GetUUID();
-                                var BillNo = InitObject.GetBillNo(CreateDate, PerTuitionFeeSubject);
-                                var BillStatus = "PAYMENTSTATE01";
-
-
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRefNoInit, BillRefId, BillID, PerTuitionFeeSubject, BillNo, PerDetailID, BillMonth, BillStatus, CreateDate, Convert.ToDecimal(PerTuitionFeeMoney));
-                                if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                {
-                                    SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill ref insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Per Tuition Fee")));
-                                }
-
-                                // Insert into bill Plan.
-                                var BillPlanID = InitObject.GetUUID();
-
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillNoLoop, BillPlanID, BillNo, PerTuitionFeeSubject, PerDetailID, 1, "N", "Y", "N", CreateDate, 0, PerTuitionFeeMoney, PerTuitionFeeMoney);
-
-                                if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                {
-                                    SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Per Tuition Fee")));
-                                }
-
-                            }
-                            else
-                            {
-                                SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, "not find rate."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Per Tuition Fee")));
-                            }
-
-
 
                         }
                         else
@@ -362,7 +497,15 @@ namespace KMISHelper.Business
                         }
 
 
+                        #endregion
+
+
+                        //--------------------------------------------------------------------------------------------------
                         // Insert Meals Fee
+                        //--------------------------------------------------------------------------------------------------
+
+
+                        #region "Meals"
 
                         var mfMethod = mfMethodPos == -1 ? string.Empty : InitObject.GetPaymentModeByName(dr[mfMethodPos].ToString());
                         var mfMoney = mfMoneyPos == -1 ? string.Empty : dr[mfMoneyPos].ToString();
@@ -373,8 +516,25 @@ namespace KMISHelper.Business
                         var mfDetailID = InitObject.GetUUID();
                         var mfStartDate = mfStartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[mfStartDatePos]).ToString("yyyy-MM-dd");
 
+
+                        var IsExistMeals = false;
+                        var MealsRefInfo = new StudentPaymentPlanRefInfo();
+
+
+                        // Is exist ref
+
+                        MealsRefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT02");
+
+                        if (!string.IsNullOrEmpty(MealsRefInfo.id))
+                        {
+                            IsExistMeals = true;
+                            mfDetailID = MealsRefInfo.id;
+                        }
+
+
                         if (!string.IsNullOrEmpty(mfMoney) && Convert.ToDecimal(mfMoney) > 0)
                         {
+
                             Sql = string.Format(InitObject.GetScriptServiceInstance().GetRateIdByKMS, Convert.ToDecimal(mfMoney), mfSubject, KindergartenId, myYearInfo.YearID);
                             dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
 
@@ -388,11 +548,44 @@ namespace KMISHelper.Business
                                 }
                             }
 
+                            if (!IsExistMeals && dt.Rows.Count <= 0)
+                            {
+                                Sql = string.Format(InitObject.GetScriptServiceInstance().GetRandRateIdByKMS, mfSubject, KindergartenId, myYearInfo.YearID);
+                                dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
+
+                                if (dt.Rows.Count <= 0)
+                                {
+                                    WriteForManual(StudentNo, string.Format(" not found Meals rates subject:'{0}',money:'{1}'", mfMoney, mfSubject),KindergartenId);
+                                }
+                                else
+                                {
+                                    foreach (DataRow row in dt.Rows)
+                                    {
+                                        mfRateID = row["rates_id"].ToString();
+                                        mfDescAlias = row["rates_alias"].ToString();
+                                        mfDescMonthlyPrice = Convert.ToDecimal(row["rates_monthly"]);
+                                    }
+                                }
+                                
+                            }
+
+                            if (!string.IsNullOrEmpty(MealsRefInfo.id))
+                            {
+                                var mfRatesInfo = GetRatesInfoByID(MealsRefInfo.rates_id);
+                                mfRateID = mfRatesInfo.rates_id;
+                                mfDescAlias = mfRatesInfo.rates_alias;
+                                mfDescMonthlyPrice = mfRatesInfo.rates_monthly;
+                            }
+
                             if (!string.IsNullOrEmpty(mfRateID) && PaymentResult > 0 && BillResult > 0)
                             {
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, mfDetailID, mfRateID, BatchNo, StudentPaymentId, mfMethod, mfSubject, Convert.ToDecimal(mfMoney), "", "", 0, 0, 1, UserID, CreateDate, mfStartDate, 0);
-                                DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
-                                DescBuilder.Append(string.Format("【餐费: {0}/月 ，缴费方式:{1}，标准:{2} 】", mfDescMonthlyPrice, dr[mfMethodPos].ToString(), mfDescAlias));
+
+                                if (!IsExistMeals)
+                                {
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, mfDetailID, mfRateID, BatchNo, StudentPaymentId, mfMethod, mfSubject, Convert.ToDecimal(mfMoney), "", "", 0, 0, 1, UserID, CreateDate, mfStartDate, 0);
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+                                    DescBuilder.Append(string.Format("【餐费: {0}/月 ，缴费方式:{1}，标准:{2} 】", mfDescMonthlyPrice, dr[mfMethodPos].ToString(), mfDescAlias));
+                                }
 
                                 // Insert into bill ref.
                                 var BillRefId = InitObject.GetUUID();
@@ -463,8 +656,14 @@ namespace KMISHelper.Business
                             SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " dont set meals fee or fee <= 0."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Meals Fee")));
                         }
 
+                        #endregion
 
+
+                        //-----------------------------------------------------------------------------------------------------
                         // Insert School Car Fee
+                        //-----------------------------------------------------------------------------------------------------
+
+                        #region "School Bus"
 
                         var scMethod = scMethodPos == -1 ? string.Empty : InitObject.GetPaymentModeByName(dr[scMethodPos].ToString());
                         var scMoney = scMoneyPos == -1 ? string.Empty : dr[scMoneyPos].ToString();
@@ -475,6 +674,19 @@ namespace KMISHelper.Business
                         var scSubject = "PAYMENTSUBJECT04";
                         var scDetailID = InitObject.GetUUID();
                         var scStartDate = scStartDatePos == -1 ? string.Empty : dr[scStartDatePos].ToString();
+                        var IsExistSchoolBus = false;
+                        var SchoolBusRefInfo = new StudentPaymentPlanRefInfo();
+
+
+                        // Is exist ref
+
+                        SchoolBusRefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT04");
+
+                        if (!string.IsNullOrEmpty(SchoolBusRefInfo.id))
+                        {
+                            IsExistSchoolBus = true;
+                            scDetailID = SchoolBusRefInfo.id;
+                        }
 
                         if (!string.IsNullOrEmpty(scStartDate))
                         {
@@ -483,6 +695,8 @@ namespace KMISHelper.Business
 
                         if (!string.IsNullOrEmpty(scMoney) && Convert.ToDecimal(scMoney) > 0)
                         {
+
+
                             Sql = string.Format(InitObject.GetScriptServiceInstance().GetRateIdByKMS, Convert.ToDecimal(scMoney), scSubject, KindergartenId, myYearInfo.YearID);
                             dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
 
@@ -496,14 +710,48 @@ namespace KMISHelper.Business
                                 }
                             }
 
+                            if (!IsExistSchoolBus && dt.Rows.Count <= 0)
+                            {
+                                Sql = string.Format(InitObject.GetScriptServiceInstance().GetRandRateIdByKMS, scSubject, KindergartenId, myYearInfo.YearID);
+                                dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
+
+                                if (dt.Rows.Count <= 0)
+                                {
+                                    WriteForManual(StudentNo, string.Format(" not found school bus rates subject:'{0}',money:'{1}'", scMoney, scSubject),KindergartenId);
+                                }
+                                else {
+                                    foreach (DataRow row in dt.Rows)
+                                    {
+                                        scRateID = row["rates_id"].ToString();
+                                        scDescAlias = row["rates_alias"].ToString();
+                                        scDescMonthlyPrice = Convert.ToDecimal(row["rates_monthly"]);
+                                    }
+                                }
+
+                            }
+                            
+
+                            if (!string.IsNullOrEmpty(SchoolBusRefInfo.id))
+                            {
+                                var scRatesInfo = GetRatesInfoByID(SchoolBusRefInfo.rates_id);
+                                scRateID = scRatesInfo.rates_id;
+                                scDescAlias = scRatesInfo.rates_alias;
+                                scDescMonthlyPrice = scRatesInfo.rates_monthly;
+                            }
+
                             if (!string.IsNullOrEmpty(scRateID) && PaymentResult > 0 && BillResult > 0)
                             {
 
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, scDetailID, scRateID, BatchNo, StudentPaymentId, scMethod, scSubject, Convert.ToDecimal(scMoney), "", "", 0, 0, 1, UserID, CreateDate, scStartDate, 0);
-                                DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
-                                DescBuilder.Append(string.Format("【校车费: {0}/月 ，缴费方式:{1}，标准:{2} 】", scDescMonthlyPrice, dr[scMethodPos].ToString(), scDescAlias));
+
+                                if (!IsExistSchoolBus)
+                                {
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, scDetailID, scRateID, BatchNo, StudentPaymentId, scMethod, scSubject, Convert.ToDecimal(scMoney), "", "", 0, 0, 1, UserID, CreateDate, scStartDate, 0);
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+                                    DescBuilder.Append(string.Format("【校车费: {0}/月 ，缴费方式:{1}，标准:{2} 】", scDescMonthlyPrice, dr[scMethodPos].ToString(), scDescAlias));
+                                }
 
                                 // Insert into bill ref.
+
                                 var BillRefId = InitObject.GetUUID();
                                 var BillNo = InitObject.GetBillNo(scStartDate, scSubject);
                                 var BillStatus = "PAYMENTSTATE01";
@@ -569,91 +817,71 @@ namespace KMISHelper.Business
                             SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " dont set school car fee or <= 0."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import School Car Fee")));
                         }
 
+
+                        #endregion
+
+                        //------------------------------------------------------------------------------------------------------
                         // Insert Once Fee
+                        //------------------------------------------------------------------------------------------------------
+
+                        #region "Insert once"
+
                         foreach (var info in ofs)
                         {
 
-
                             var ofMoney = int.Parse(info.Key.ToString()) == -1 ? string.Empty : dr[int.Parse(info.Key.ToString())].ToString();
-                            var ofRateID = string.Empty;
-                            var ofDescAlias = string.Empty;
-                            var ofDescMonthlyPrice = new decimal(0);
                             var ofSubject = "PAYMENTSUBJECT03";
-                            var ofDetailID = InitObject.GetUUID();
 
                             if (!string.IsNullOrEmpty(ofMoney) && Convert.ToDecimal(ofMoney) > 0)
                             {
 
-
-
-                                //Sql = string.Format(InitObject.GetScriptServiceInstance().GetRateIdByKMS, Convert.ToDecimal(ofMoney), ofSubject, KindergartenId, myYearInfo.YearID);
-                                //dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
-
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().GetRateIdByAliasName, ofSubject, KindergartenId, myYearInfo.YearID, info.Value);
-                                dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
-
-                                if (dt.Rows.Count >= 1)
+                                if (PaymentResult > 0 && BillResult > 0)
                                 {
-                                    foreach (DataRow row in dt.Rows)
-                                    {
-                                        ofRateID = row["rates_id"].ToString();
-                                        ofDescAlias = row["rates_alias"].ToString();
-                                        ofDescMonthlyPrice = Convert.ToDecimal(row["rates_monthly"]);
-                                        ofm.Add(ofMoney);
-                                    }
-                                }
-
-                                if (!string.IsNullOrEmpty(ofRateID) && PaymentResult > 0 && BillResult > 0)
-                                {
-                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, ofDetailID, ofRateID, BatchNo, StudentPaymentId, "", ofSubject, Convert.ToDecimal(ofMoney), "", "", 0, 0, 1, UserID, CreateDate, CreateDate, 0);
-                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
-                                    DescBuilder.Append(string.Format("【{0}: {1} ，标准:{1} 】", ofDescAlias, ofDescMonthlyPrice, ofDescAlias));
 
                                     // Insert into bill ref.
+                                    
                                     var BillRefId = InitObject.GetUUID();
                                     var BillNo = InitObject.GetBillNo(CreateDate, ofSubject);
                                     var BillStatus = "PAYMENTSTATE01";
 
-                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRefNoInit, BillRefId, BillID, ofSubject, BillNo, ofDetailID, BillMonth, BillStatus, CreateDate, Convert.ToDecimal(ofMoney));
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRefNoInit, BillRefId, BillID, ofSubject, BillNo, string.Empty, BillMonth, BillStatus, CreateDate, Convert.ToDecimal(ofMoney));
                                     if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
                                     {
                                         SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill ref insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Once Fee")));
                                     }
-
-                                    // Insert into bill plan.
-                                    var BillPlanID = InitObject.GetUUID();
-
-                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillNoLoop, BillPlanID, BillNo, ofSubject, ofDetailID, 1, "N", "Y", "N", CreateDate, 0, Convert.ToDecimal(ofMoney), Convert.ToDecimal(ofMoney));
-
-                                    if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                    {
-                                        SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Once Fee")));
+                                    else {
+                                        ofm.Add(ofMoney);
                                     }
 
-                                }
-                                else
-                                {
-                                    SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " dont find once fee rate."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Once Fee")));
-                                }
 
-
+                                }
 
                             }
                             else
                             {
                                 SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " dont set once fee or <= 0."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Once Fee")));
                             }
-                            // End Insert Once Fee
 
                         }
 
-                        // update payment plan
-                        Sql = string.Format(InitObject.GetScriptServiceInstance().UpdateStudentPayment, DescBuilder.ToString(), StudentPaymentId);
-                        DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+                        #endregion
+
+
+
+                        // update payment plan if don't exist student payment plan
+
+                        if (!IsAppend)
+                        {
+
+                            Sql = string.Format(InitObject.GetScriptServiceInstance().UpdateStudentPayment, DescBuilder.ToString(), StudentPaymentId);
+                            DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+
+                        }
 
                         var sum = InitObject.TotalBillMoney(PerTuitionFeeMoney, TuitionFeeMoney, DiscountMoney, mfMoney, scMoney, ofm, Convert.ToInt32(dr[MonthPos]), scMonth);
                         Sql = string.Format(InitObject.GetScriptServiceInstance().UpdateFinBill, sum, 0, BillID);
                         DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+
 
                     }
 
@@ -707,7 +935,7 @@ namespace KMISHelper.Business
 
 
                         var StudentNo = StudentNoPos == -1 ? string.Empty : dr[StudentNoPos].ToString();
-                        sno = StudentNo;
+                        Write(StudentNo, " start handle this student no payment.", BznsBase.KindergartenId);
                         var BillInfo = new BillInfo();
                         var StudentBalanceInfo = new StudentBalanceInfo();
                         List<BillRefInfo> BillRefs = new List<BillRefInfo>();
@@ -729,7 +957,7 @@ namespace KMISHelper.Business
 
                                 // Get StudentID and ClassID
 
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().GetClassIDByStudentID, StudentNo);
+                                Sql = string.Format(InitObject.GetScriptServiceInstance().GetClassIDByStudentID, StudentNo.Trim());
                                 dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
 
                                 if (dt.Rows.Count > 0)
@@ -737,7 +965,7 @@ namespace KMISHelper.Business
                                     ClassId = dt.Rows[0]["class_id"].ToString();
                                     StudentId = dt.Rows[0]["stu_id"].ToString();
                                 }
-                            
+
                                 // Get Student Balance Info
 
                                 Sql = string.Format(InitObject.GetScriptServiceInstance().GetStudentBalanceListByStudentId, StudentId);
@@ -797,7 +1025,8 @@ namespace KMISHelper.Business
                                             PreTuitionMoney = Convert.ToDecimal(row["bill_money"]);
                                         }
 
-                                        if (row["bill_type"].ToString() == "PAYMENTSUBJECT01") {
+                                        if (row["bill_type"].ToString() == "PAYMENTSUBJECT01")
+                                        {
                                             IsHaveTuition = true;
                                         }
                                         // -------------------------------------------------------------
@@ -836,7 +1065,8 @@ namespace KMISHelper.Business
 
                                     var pyamentTotalMoney = BillInfo.SumMoney;
 
-                                    if (IsHaveTuition && SBAInfo.AvlAmt > 0) {
+                                    if (IsHaveTuition && SBAInfo.AvlAmt > 0)
+                                    {
                                         pyamentTotalMoney = BillInfo.SumMoney - SBAInfo.AvlAmt;
                                     }
 
@@ -870,14 +1100,16 @@ namespace KMISHelper.Business
 
                                             var AccountID = InitObject.GetUUID();
 
-                                            switch (bri.Type.Trim()) {
+                                            switch (bri.Type.Trim())
+                                            {
 
                                                 case "PAYMENTSUBJECT01":
                                                     if (SAInfo.IsExistTuitionAccount)
                                                     {
                                                         Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountUpdate, bri.Money, 0, SAInfo.TuitionAccountId);
                                                     }
-                                                    else {
+                                                    else
+                                                    {
                                                         Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate, 0);
                                                     }
                                                     break;
@@ -899,6 +1131,8 @@ namespace KMISHelper.Business
                                                     else
                                                     {
                                                         Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate, 0);
+                                                        SAInfo.IsExistOtherAccount = true;
+                                                        SAInfo.OtherAccountId = AccountID;
                                                     }
                                                     break;
                                                 case "PAYMENTSUBJECT04":
@@ -908,7 +1142,7 @@ namespace KMISHelper.Business
                                                     }
                                                     else
                                                     {
-                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate,0);
+                                                        Sql = string.Format(InitObject.GetScriptServiceInstance().StudentBalanceAccountInsert, AccountID, StudentBalanceInfo.BalanceId, StudentId, bri.Money, bri.Type, BznsBase.UserID, CreateDate, 0);
                                                     }
                                                     break;
                                                 case "PAYMENTSUBJECT05":
@@ -966,7 +1200,7 @@ namespace KMISHelper.Business
                                                     DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
                                                     break;
                                                 case "PAYMENTSUBJECT05":
-                                                    
+
                                                     var val = new decimal(0);
                                                     var tbdMoney = new decimal(0);
 
@@ -976,7 +1210,7 @@ namespace KMISHelper.Business
                                                         tbdMoney = bri.Money;
                                                     }
 
-                                                    Sql = string.Format(InitObject.GetScriptServiceInstance().PrepaidTuitionAccountInsert, SubjectAccountId, AccountID, StudentId, BillInfo.YearId, val, 'Y', tbdMoney , bri.RefID, BznsBase.UserID, CreateDate);
+                                                    Sql = string.Format(InitObject.GetScriptServiceInstance().PrepaidTuitionAccountInsert, SubjectAccountId, AccountID, StudentId, BillInfo.YearId, val, 'Y', tbdMoney, bri.RefID, BznsBase.UserID, CreateDate);
                                                     DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
 
                                                     if (PreTuitionInfo.IsLog)
@@ -1130,7 +1364,7 @@ namespace KMISHelper.Business
                     }
                 }
 
-                
+
 
                 foreach (BillRefInfo b in BillRefs)
                 {
@@ -1194,7 +1428,7 @@ namespace KMISHelper.Business
 
         }
 
-        public bool InsertForShanghai(bool IsTry2Import, DataTable Students, int StudentNoPos, int YearPos, int StartDatePos, int PTMoneyPos, int PTRateIDPos, int TMoneyPos, int TRateIDPos, int TStartDatePos, List<MoneyInfo> tmi, int MMoneyPos, int MRateIDPos, int MStartDatePos, List<MoneyInfo> mmi, int SBMoneyPos, int SBRateIDPos, int SBStartDatePos, List<MoneyInfo> sbmi, List<OnceInfo> omi , int TMonthPos, int MMonthPos, int SBMonthPos)
+        public bool InsertForShanghai(bool IsTry2Import, DataTable Students, int StudentNoPos, int YearPos, int StartDatePos, int PTMoneyPos, int PTRateIDPos, int TMoneyPos, int TRateIDPos, int TStartDatePos, List<MoneyInfo> tmi, int MMoneyPos, int MRateIDPos, int MStartDatePos, List<MoneyInfo> mmi, int SBMoneyPos, int SBRateIDPos, int SBStartDatePos, List<MoneyInfo> sbmi, List<OnceInfo> omi, int TMonthPos, int MMonthPos, int SBMonthPos,int DiscountIdPos,int DiscountMoneyPos,int DiscountTypePos)
         {
 
             var result = false;
@@ -1205,6 +1439,8 @@ namespace KMISHelper.Business
             var gtm = new decimal(0);
             var gmm = new decimal(0);
             var gsbm = new decimal(0);
+            var StudentPaymentPlanInfo = new StudentPaymentPlanInfo();
+            var SAInfo = new ExistAccountInfo();
 
 
             using (MySqlConnection conn = new MySqlConnection(BznsBase.GetConnectionString))
@@ -1221,18 +1457,23 @@ namespace KMISHelper.Business
 
                         var DescBuilder = new StringBuilder().Clear();
                         var StudentNo = StudentNoPos == -1 ? string.Empty : dr[StudentNoPos].ToString();
-                        
+
                         var ClassId = string.Empty;
                         var StudentId = string.Empty;
                         var dt = new DataTable();
                         var myClassInfo = new ClassInfo();
                         var StudentPaymentId = InitObject.GetUUID();
+                        var BatchNo = InitObject.GetSysDate(true);
                         var PaymentResult = 0;
                         var BillResult = 0;
                         var BillID = string.Empty;
                         var BillMonth = DateTime.Now.ToString("yyyy-MM");
                         var YearID = dr[YearPos].ToString();
                         List<string> ofm = new List<string>();
+                        var IsAppend = false;
+
+
+                        Write(StudentNo, " start handle this student no.", BznsBase.KindergartenId);
 
                         // Get Student Info
 
@@ -1265,20 +1506,107 @@ namespace KMISHelper.Business
                         // Get Monthly Info
 
                         var BillStartDate = Convert.ToDateTime(dr[StartDatePos]);
+                        var BillStartEndDate = BillStartDate.AddMonths(Convert.ToInt32(dr[TMonthPos]));
                         var MonthDict = new Dictionary<string, MonthInfo>();
                         MonthDict = InitObject.SplitMonth(BillStartDate, Convert.ToInt32(dr[TMonthPos]), myClassInfo.CalendarId, YearID);
+
+
+                        // Is exist student payment plan?
+
+                        SAInfo = GetStudentAllAccount(StudentId);
+                        StudentPaymentPlanInfo = GetStudentPaymentPlanInfoBySID(StudentId);
+
+                        if (!string.IsNullOrEmpty(StudentPaymentPlanInfo.student_payment_id))
+                        {
+
+                            IsAppend = true;
+                        }
+                        else
+                        {
+                            IsAppend = false;
+                        }
 
                         // Insert Into Student Payment Plan
 
                         if (!string.IsNullOrEmpty(StudentId))
                         {
-                            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPayment, StudentPaymentId, StudentId, ClassId, BznsBase.KindergartenId, myClassInfo.ClassType, "Y", BznsBase.UserID, CreateDate);
-                            PaymentResult = DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+
+                            if (IsAppend)
+                            {
+
+                                PaymentResult = 1;
+                                StudentPaymentId = StudentPaymentPlanInfo.student_payment_id;
+
+                                // Is throw an error log?
+
+                                var MoneyFromTuition = TMoneyPos == -1 ? string.Empty : dr[TMoneyPos].ToString();
+                                var MoneyFromMeals = MMoneyPos == -1 ? string.Empty : dr[MMoneyPos].ToString();
+                                var MoneyFromSchoolBus = SBMoneyPos == -1 ? string.Empty : dr[SBMoneyPos].ToString();
+                                var RefInfo = new StudentPaymentPlanRefInfo();
+                                var IsHaveTuitionPlan = false;
+                                var IsHaveMealsPlan = false;
+                                var IsHaveSchoolBusPlan = false;
+
+
+                                if (!string.IsNullOrEmpty(MoneyFromTuition) && Convert.ToDecimal(MoneyFromTuition) > 0)
+                                {
+
+                                    RefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT01");
+
+                                    if (!string.IsNullOrEmpty(RefInfo.id))
+                                    {
+                                        IsHaveTuitionPlan = IsExistBillPlan("PAYMENTSUBJECT01", BillStartDate.ToString("yyyy-MM-dd"), BillStartEndDate.ToString("yyyy-MM-dd"), RefInfo.id);
+                                        if (IsHaveTuitionPlan)
+                                        {
+                                            WriteForManual(StudentNo, " PAYMENTSUBJECT01", BznsBase.KindergartenId);
+                                            continue;
+                                        }
+                                    }
+
+                                }
+
+                                if (!string.IsNullOrEmpty(MoneyFromMeals) && Convert.ToDecimal(MoneyFromMeals) > 0)
+                                {
+
+                                    RefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT02");
+
+                                    if (!string.IsNullOrEmpty(RefInfo.id))
+                                    {
+                                        IsHaveMealsPlan = IsExistBillPlan("PAYMENTSUBJECT02", BillStartDate.ToString("yyyy-MM-dd"), BillStartEndDate.ToString("yyyy-MM-dd"), RefInfo.id);
+                                        if (IsHaveMealsPlan)
+                                        {
+                                            WriteForManual(StudentNo, " PAYMENTSUBJECT02", BznsBase.KindergartenId);
+                                            continue;
+                                        }
+                                    }
+
+                                }
+
+                                if (!string.IsNullOrEmpty(MoneyFromSchoolBus) && Convert.ToDecimal(MoneyFromSchoolBus) > 0)
+                                {
+
+                                    RefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT04");
+
+                                    if (!string.IsNullOrEmpty(RefInfo.id))
+                                    {
+                                        IsHaveSchoolBusPlan = IsExistBillPlan("PAYMENTSUBJECT04", BillStartDate.ToString("yyyy-MM-dd"), BillStartEndDate.ToString("yyyy-MM-dd"), RefInfo.id);
+                                        if (IsHaveSchoolBusPlan)
+                                        {
+                                            WriteForManual(StudentNo, " PAYMENTSUBJECT04", BznsBase.KindergartenId);
+                                            continue;
+                                        }
+                                    }
+
+                                }
+
+                            }
+                            else {
+                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPayment, StudentPaymentId, StudentId, ClassId, BznsBase.KindergartenId, myClassInfo.ClassType, "Y", BznsBase.UserID, CreateDate);
+                                PaymentResult = DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+                            }
+
                         }
-                        else
-                        {
-                            SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, "not found the student no."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Student Payment")));
-                        }
+
 
                         // Insert into fin bill
 
@@ -1294,263 +1622,282 @@ namespace KMISHelper.Business
                             BillResult = DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
 
                         }
-                        else
-                        {
-                            SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, "not found the student no, start date or month."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Plan")));
-                        }
+
 
 
                         #region per tuition
 
-                            // Insert Per Tuition Fee
+                        // Insert Per Tuition Fee
 
-                            var BatchNo = InitObject.GetSysDate(true);
-                            var PerTuitionFeeMoney = PTMoneyPos == -1 ? string.Empty : dr[PTMoneyPos].ToString();
-                            var PerRateID = PTRateIDPos == -1 ? string.Empty : dr[PTRateIDPos].ToString();
-                            var PerDescAlias = "标准预缴学费";
-                            var PerDescMonthlyPrice = new decimal(0);
-                            var PerTuitionFeeSubject = "PAYMENTSUBJECT05";
-                            var PerDetailID = InitObject.GetUUID();
+                        var PerTuitionFeeMoney = PTMoneyPos == -1 ? string.Empty : dr[PTMoneyPos].ToString();
+                        var PerTuitionFeeSubject = "PAYMENTSUBJECT05";
 
-                            if (!string.IsNullOrEmpty(PerTuitionFeeMoney) && Convert.ToDecimal(PerTuitionFeeMoney) > 0 && PaymentResult > 0 && BillResult > 0)
-                            {
+                        if (!string.IsNullOrEmpty(PerTuitionFeeMoney) && Convert.ToDecimal(PerTuitionFeeMoney) > 0 && PaymentResult > 0 && BillResult > 0)
+                        {
 
-                                PerDescMonthlyPrice = PTMoneyPos == -1 ? 0 : Convert.ToDecimal(dr[PTMoneyPos]);
+                            var BillRefId = InitObject.GetUUID();
+                            var BillNo = InitObject.GetBillNo(CreateDate, PerTuitionFeeSubject);
+                            var BillStatus = "PAYMENTSTATE01";
 
+                            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRefNoInit, BillRefId, BillID, PerTuitionFeeSubject, BillNo, string.Empty, BillMonth, BillStatus, CreateDate, Convert.ToDecimal(PerTuitionFeeMoney));
+                            DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
 
-                                if (!string.IsNullOrEmpty(PerRateID) && PaymentResult > 0)
-                                {
-                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, PerDetailID, PerRateID, BatchNo, StudentPaymentId, "", PerTuitionFeeSubject, Convert.ToDecimal(PerTuitionFeeMoney), "", "", 0, 0, 1, BznsBase.UserID, CreateDate, CreateDate, 0);
-                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
-                                    DescBuilder.Append(string.Format("【预缴学费: {0} ，标准:{1} 】", PerDescMonthlyPrice, PerDescAlias));
-
-                                    // Insert into bill ref.
-                                    var BillRefId = InitObject.GetUUID();
-                                    var BillNo = InitObject.GetBillNo(CreateDate, PerTuitionFeeSubject);
-                                    var BillStatus = "PAYMENTSTATE01";
-
-
-                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRefNoInit, BillRefId, BillID, PerTuitionFeeSubject, BillNo, PerDetailID, BillMonth, BillStatus, CreateDate, Convert.ToDecimal(PerTuitionFeeMoney));
-                                    if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                    {
-                                        SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill ref insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Per Tuition Fee")));
-                                    }
-
-                                    // Insert into bill Plan.
-                                    var BillPlanID = InitObject.GetUUID();
-
-                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillNoLoop, BillPlanID, BillNo, PerTuitionFeeSubject, PerDetailID, 1, "N", "Y", "N", CreateDate, 0, PerTuitionFeeMoney, PerTuitionFeeMoney);
-
-                                    if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                    {
-                                        SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Per Tuition Fee")));
-                                    }
-
-                                }
-                                else
-                                {
-                                    SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, "not find rate."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Per Tuition Fee")));
-                                }
-
-
-
-                            }
-                            else
-                            {
-                                SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " dont set per tuition or fee <= 0."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Per Tuition Fee")));
-                            }
+                        }
+                       
 
                         #endregion
 
                         #region tuition
 
-                            // Insert Into PaymentPlanRef - Tuition Fee 
+                        // Insert Into PaymentPlanRef - Tuition Fee 
 
-                            var PaymentMethod = "PAYMENTMODE04";
-                            var TuitionFeeMoney = TMoneyPos == -1 ? string.Empty : dr[TMoneyPos].ToString();
-                            var StartDate = StartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[TStartDatePos]).ToString("yyyy-MM-dd");
-                            var TuitionFeeSubject = "PAYMENTSUBJECT01";
-                            var RateId = TRateIDPos == -1 ? string.Empty : dr[TRateIDPos].ToString(); ;
-                            var DetailID = InitObject.GetUUID();
-                            var BillMoney = new decimal(0);
+                        var PaymentMethod = "PAYMENTMODE04";
+                        var TuitionFeeMoney = TMoneyPos == -1 ? string.Empty : dr[TMoneyPos].ToString();
+                        var StartDate = StartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[TStartDatePos]).ToString("yyyy-MM-dd");
+                        var TuitionFeeSubject = "PAYMENTSUBJECT01";
+                        var RateId = TRateIDPos == -1 ? string.Empty : dr[TRateIDPos].ToString();
+                        var DetailID = InitObject.GetUUID();
+                        var BillMoney = new decimal(0);
+                        var IsExistTuition = false;
+                        var TuitionRefInfo = new StudentPaymentPlanRefInfo();
 
-                            // Get RateId
-                            if (!string.IsNullOrEmpty(TuitionFeeMoney) && Convert.ToDecimal(TuitionFeeMoney) > 0)
+                        var DiscountId = DiscountIdPos == -1 ? string.Empty : dr[DiscountIdPos].ToString();
+                        var DiscountType = DiscountTypePos == -1 ? string.Empty : dr[DiscountTypePos].ToString();
+                        var DiscountMoney = new decimal(0);
+                        var DiscountVal = new decimal(0);
+
+                        if (!string.IsNullOrEmpty(dr[DiscountMoneyPos].ToString())) {
+                            DiscountMoney = Convert.ToDecimal(dr[DiscountMoneyPos]);
+                        }
+
+                        // Is exist ref
+
+                        TuitionRefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT01");
+
+                        if (!string.IsNullOrEmpty(TuitionRefInfo.id))
+                        {
+                            IsExistTuition = true;
+                            DetailID = TuitionRefInfo.id;
+                        }
+
+                        // Get RateId
+                        if (!string.IsNullOrEmpty(TuitionFeeMoney) && Convert.ToDecimal(TuitionFeeMoney) > 0)
+                        {
+                            DescAlias = "标准学费";
+                            DescMonthlyPrice = Convert.ToDecimal(TuitionFeeMoney);
+                        }
+
+
+                        // Insert into Tuition
+
+                        if (!string.IsNullOrEmpty(TuitionFeeMoney) && Convert.ToDecimal(TuitionFeeMoney) > 0 && !string.IsNullOrEmpty(RateId) && PaymentResult > 0 && BillResult > 0)
+                        {
+
+                            DiscountVal = Convert.ToDecimal(TuitionFeeMoney) - Convert.ToDecimal(DiscountMoney);
+
+                            if (!string.IsNullOrEmpty(DiscountId))
                             {
 
-                                DescAlias = "标准学费";
-                                DescMonthlyPrice = Convert.ToDecimal(TuitionFeeMoney);
+                                if (!string.IsNullOrEmpty(TuitionRefInfo.id))
+                                {
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().UpdatePaymentRefForShanghai, DiscountId, DiscountType, DiscountVal, DiscountMoney, BznsBase.UserID, CreateDate, TuitionRefInfo.id);
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+                                }
+
                             }
+                            
+                            if (!IsExistTuition) {
 
-
-                            // Insert into Tuition
-
-                            if (!string.IsNullOrEmpty(TuitionFeeMoney) && Convert.ToDecimal(TuitionFeeMoney) > 0 && !string.IsNullOrEmpty(RateId) && PaymentResult > 0 && BillResult > 0)
-                            {
-
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, DetailID, RateId, BatchNo, StudentPaymentId, PaymentMethod, TuitionFeeSubject, Convert.ToDecimal(TuitionFeeMoney), "", "", 0, 0, 1, BznsBase.UserID, CreateDate, StartDate, 0);
+                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, DetailID, RateId, BatchNo, StudentPaymentId, PaymentMethod, TuitionFeeSubject, Convert.ToDecimal(TuitionFeeMoney), DiscountId, DiscountType, DiscountMoney, DiscountVal, 1, BznsBase.UserID, CreateDate, StartDate, 0);
                                 DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
                                 DescBuilder.Append(string.Format("【学费: {0}/月 ，缴费方式:{1}，标准:{2} 】", DescMonthlyPrice, "月", DescAlias));
 
-                                foreach (MoneyInfo mi in tmi)
-                                {
-                                    if (!string.IsNullOrEmpty(dr[mi.MoneyPos].ToString())) {
-                                        BillMoney += Convert.ToDecimal(dr[mi.MoneyPos]);
-                                    }
-                                }
-
-
-                                // Insert into bill ref
-                                var BillRefId = InitObject.GetUUID();
-                                var BillNo = InitObject.GetBillNo(StartDate, TuitionFeeSubject);
-                                var BillStatus = "PAYMENTSTATE01";
-
-                                var tbStartDate = Convert.ToDateTime(dr[StartDatePos]);
-                                var tbMonthDict = new Dictionary<string, MonthInfo>();
-                                MonthDict = InitObject.SplitMonth(Convert.ToDateTime(dr[TStartDatePos]), Convert.ToInt32(dr[TMonthPos]), myClassInfo.CalendarId, YearID);
-
-                                var tbsd = MonthDict["summary"].StartDate.ToString("yyyy-MM-dd");
-                                var tbed = MonthDict["summary"].EndDate.ToString("yyyy-MM-dd");
-
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRef, BillRefId, BillID, TuitionFeeSubject, BillNo, DetailID, BillMonth, BillStatus, CreateDate, tbsd, tbed, BillMoney);
-                                if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                {
-                                    SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill ref insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Ref Tuition Fee")));
-                                }
-
-                                // Insert into bill plan.
-
-
-                                var i = 0;
-                                var IsFirstMonth = true;
-                                foreach (KeyValuePair<string, MonthInfo> kv in MonthDict)
-                                {
-
-                                    if (!kv.Key.Equals("summary"))
-                                    {
-                                        var key = kv.Key;
-                                        var val = kv.Value;
-                                        var BillPlanID = InitObject.GetUUID();
-                                        var FirstMonth = "N";
-                                        var Money = dr[tmi[i].MoneyPos];
-
-                                        if (IsFirstMonth)
-                                        {
-                                            FirstMonth = "Y";
-                                        }
-
-
-                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, TuitionFeeSubject, DetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, Convert.ToDecimal(Money), 0, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
-
-                                        if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                        {
-                                            SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Plan Tuition Fee")));
-                                        }
-                                        IsFirstMonth = false;
-                                        i++;
-                                    }
-
-                                }
-
-
-
                             }
-                            else
+
+                            foreach (MoneyInfo mi in tmi)
                             {
-                                SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " dont set the tuition or fee <= 0 or not find rate."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Tuition Fee")));
+                                if (!string.IsNullOrEmpty(dr[mi.MoneyPos].ToString()) && Convert.ToDecimal(dr[mi.MoneyPos]) > 0)
+                                {
+                                    BillMoney += Convert.ToDecimal(dr[mi.MoneyPos]);
+                                }
                             }
+
+                            // Insert into bill ref
+
+                            var BillRefId = InitObject.GetUUID();
+                            var BillNo = InitObject.GetBillNo(StartDate, TuitionFeeSubject);
+                            var BillStatus = "PAYMENTSTATE01";
+
+                            var tbStartDate = Convert.ToDateTime(dr[StartDatePos]);
+                            var tbMonthDict = new Dictionary<string, MonthInfo>();
+                            MonthDict = InitObject.SplitMonth(Convert.ToDateTime(dr[TStartDatePos]), Convert.ToInt32(dr[TMonthPos]), myClassInfo.CalendarId, YearID);
+
+                            var tbsd = MonthDict["summary"].StartDate.ToString("yyyy-MM-dd");
+                            var tbed = MonthDict["summary"].EndDate.ToString("yyyy-MM-dd");
+
+                            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRef, BillRefId, BillID, TuitionFeeSubject, BillNo, DetailID, BillMonth, BillStatus, CreateDate, tbsd, tbed, BillMoney);
+                            DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+
+                            // Insert into bill plan.
+
+                            var i = 0;
+                            var IsFirstMonth = true;
+                            foreach (KeyValuePair<string, MonthInfo> kv in MonthDict)
+                            {
+
+                                if (!kv.Key.Equals("summary"))
+                                {
+                                    var key = kv.Key;
+                                    var val = kv.Value;
+                                    var BillPlanID = InitObject.GetUUID();
+                                    var FirstMonth = "N";
+                                    var Money = Convert.ToDecimal(dr[tmi[i].MoneyPos]);
+
+                                    if (IsFirstMonth)
+                                    {
+                                        FirstMonth = "Y";
+                                    }
+
+                                    if (Convert.ToDecimal(Money) < -1)
+                                    {
+                                        Money = Money * -1;
+                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, TuitionFeeSubject, DetailID, 0, FirstMonth, "Y", "N", CreateDate, val.StudyDays, TuitionFeeMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                                    }
+                                    else {
+                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, TuitionFeeSubject, DetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, TuitionFeeMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                                    }
+
+                                    if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
+                                    {
+                                        SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Plan Tuition Fee")));
+                                    }
+
+                                    IsFirstMonth = false;
+                                    i++;
+
+                                }
+
+                            }
+
+
+
+                        }
+                        else
+                        {
+                            SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " dont set the tuition or fee <= 0 or not find rate."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Tuition Fee")));
+                        }
 
                         #endregion
 
                         #region meals
 
-                            // Insert Into PaymentPlanRef - Meals 
+                        // Insert Into PaymentPlanRef - Meals
 
-                            var MealsMoney = MMoneyPos == -1 ? string.Empty : dr[MMoneyPos].ToString();
-                            var mStartDate = MStartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[MStartDatePos]).ToString("yyyy-MM-dd");
-                            var MealsSubject = "PAYMENTSUBJECT02";
-                            var mRateId = MRateIDPos == -1 ? string.Empty : dr[MRateIDPos].ToString();
-                            var mDetailID = InitObject.GetUUID();
-                            var mBillMoney = new decimal(0);
+                        var MealsMoney = MMoneyPos == -1 ? string.Empty : dr[MMoneyPos].ToString();
+                        var mStartDate = MStartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[MStartDatePos]).ToString("yyyy-MM-dd");
+                        var MealsSubject = "PAYMENTSUBJECT02";
+                        var mRateId = MRateIDPos == -1 ? string.Empty : dr[MRateIDPos].ToString();
+                        var mDetailID = InitObject.GetUUID();
+                        var mBillMoney = new decimal(0);
+                        var IsExistMeals = false;
+                        var MealsRefInfo = new StudentPaymentPlanRefInfo();
 
-                            // Get RateId
-                            if (!string.IsNullOrEmpty(MealsMoney) && Convert.ToDecimal(MealsMoney) > 0)
-                            {
+                        // Is exist ref
 
-                                DescAlias = "标准餐费";
-                                DescMonthlyPrice = Convert.ToDecimal(MealsMoney);
-                            }
+                        MealsRefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT02");
+
+                        if (!string.IsNullOrEmpty(MealsRefInfo.id))
+                        {
+                            IsExistMeals = true;
+                            mDetailID = MealsRefInfo.id;
+                        }
 
 
+                        // Get RateId
+                        if (!string.IsNullOrEmpty(MealsMoney) && Convert.ToDecimal(MealsMoney) > 0)
+                        {
+                            DescAlias = "标准餐费";
+                            DescMonthlyPrice = Convert.ToDecimal(MealsMoney);
+                        }
 
-                            if (!string.IsNullOrEmpty(MealsMoney) && Convert.ToDecimal(MealsMoney) > 0 && !string.IsNullOrEmpty(mRateId) && PaymentResult > 0 && BillResult > 0)
-                            {
 
+                        if (!string.IsNullOrEmpty(MealsMoney) && Convert.ToDecimal(MealsMoney) > 0 && !string.IsNullOrEmpty(mRateId) && PaymentResult > 0 && BillResult > 0)
+                        {
+
+                            if (!IsExistMeals) {
                                 Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, mDetailID, mRateId, BatchNo, StudentPaymentId, PaymentMethod, MealsSubject, Convert.ToDecimal(MealsMoney), "", "", 0, 0, 1, BznsBase.UserID, CreateDate, mStartDate, 0);
                                 DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
                                 DescBuilder.Append(string.Format("【餐费: {0}/月 ，缴费方式:{1}，标准:{2} 】", DescMonthlyPrice, "月", DescAlias));
-
-                                foreach (MoneyInfo mi in mmi)
-                                {
-                                    if (!string.IsNullOrEmpty(dr[mi.MoneyPos].ToString())) mBillMoney += Convert.ToDecimal(dr[mi.MoneyPos]);
-                                }
-
-                                // Insert into bill ref
-                                var BillRefId = InitObject.GetUUID();
-                                var BillNo = InitObject.GetBillNo(mStartDate, MealsSubject);
-                                var BillStatus = "PAYMENTSTATE01";
-
-                                var tbStartDate = Convert.ToDateTime(dr[MStartDatePos]);
-                                var tbMonthDict = new Dictionary<string, MonthInfo>();
-                                MonthDict = InitObject.SplitMonth(Convert.ToDateTime(dr[MStartDatePos]), Convert.ToInt32(dr[MMonthPos]), myClassInfo.CalendarId, YearID);
-
-                                var tbsd = MonthDict["summary"].StartDate.ToString("yyyy-MM-dd");
-                                var tbed = MonthDict["summary"].EndDate.ToString("yyyy-MM-dd");
-
-                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRef, BillRefId, BillID, MealsSubject, BillNo, mDetailID, BillMonth, BillStatus, CreateDate, tbsd, tbed, mBillMoney);
-                                if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                {
-                                    SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill ref insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Ref Meals Fee")));
-                                }
-
-                                // Insert into bill plan.
-
-
-                                var i = 0;
-                                var IsFirstMonth = true;
-                                foreach (KeyValuePair<string, MonthInfo> kv in MonthDict)
-                                {
-
-                                    if (!kv.Key.Equals("summary"))
-                                    {
-                                        var key = kv.Key;
-                                        var val = kv.Value;
-                                        var BillPlanID = InitObject.GetUUID();
-                                        var FirstMonth = "N";
-                                        var Money = dr[mmi[i].MoneyPos];
-
-                                        if (IsFirstMonth)
-                                        {
-                                            FirstMonth = "Y";
-                                        }
-
-
-                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, MealsSubject, mDetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, Convert.ToDecimal(Money), 0, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
-
-                                        if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                        {
-                                            SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Plan Meals Fee")));
-                                        }
-                                        IsFirstMonth = false;
-                                        i++;
-                                    }
-                                }
-
                             }
-                            else
+
+
+                            foreach (MoneyInfo mi in mmi)
                             {
-                                SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " dont set the tuition or fee <= 0 or not find rate."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Meals Fee")));
+                                if (!string.IsNullOrEmpty(dr[mi.MoneyPos].ToString()) && Convert.ToDecimal(dr[mi.MoneyPos]) > 0) {
+                                    mBillMoney += Convert.ToDecimal(dr[mi.MoneyPos]);
+                                }
                             }
+
+                            // Insert into bill ref
+                            var BillRefId = InitObject.GetUUID();
+                            var BillNo = InitObject.GetBillNo(mStartDate, MealsSubject);
+                            var BillStatus = "PAYMENTSTATE01";
+
+                            var tbStartDate = Convert.ToDateTime(dr[MStartDatePos]);
+                            var tbMonthDict = new Dictionary<string, MonthInfo>();
+                            MonthDict = InitObject.SplitMonth(Convert.ToDateTime(dr[MStartDatePos]), Convert.ToInt32(dr[MMonthPos]), myClassInfo.CalendarId, YearID);
+
+                            var tbsd = MonthDict["summary"].StartDate.ToString("yyyy-MM-dd");
+                            var tbed = MonthDict["summary"].EndDate.ToString("yyyy-MM-dd");
+
+                            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRef, BillRefId, BillID, MealsSubject, BillNo, mDetailID, BillMonth, BillStatus, CreateDate, tbsd, tbed, mBillMoney);
+                            DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+
+                            // Insert into bill plan.
+
+
+                            var i = 0;
+                            var IsFirstMonth = true;
+                            foreach (KeyValuePair<string, MonthInfo> kv in MonthDict)
+                            {
+
+                                if (!kv.Key.Equals("summary"))
+                                {
+                                    var key = kv.Key;
+                                    var val = kv.Value;
+                                    var BillPlanID = InitObject.GetUUID();
+                                    var FirstMonth = "N";
+                                    var Money = Convert.ToDecimal(dr[mmi[i].MoneyPos]);
+
+                                    if (IsFirstMonth)
+                                    {
+                                        FirstMonth = "Y";
+                                    }
+
+                                    if (Convert.ToDecimal(Money) < -1)
+                                    {
+                                        Money = Money * -1;
+                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, MealsSubject, mDetailID, 0, FirstMonth, "Y", "N", CreateDate, val.StudyDays, MealsMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                                    }
+                                    else {
+                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, MealsSubject, mDetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, MealsMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                                    }
+
+
+                                    if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
+                                    {
+                                        SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Plan Meals Fee")));
+                                    }
+                                    IsFirstMonth = false;
+                                    i++;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " dont set the tuition or fee <= 0 or not find rate."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Meals Fee")));
+                        }
 
                         #endregion
 
@@ -1559,11 +1906,30 @@ namespace KMISHelper.Business
                         // Insert Into PaymentPlanRef - Meals 
 
                         var sbMoney = SBMoneyPos == -1 ? string.Empty : dr[SBMoneyPos].ToString();
-                        var sbStartDate = SBStartDatePos == -1 ? string.Empty : Convert.ToDateTime(dr[SBStartDatePos]).ToString("yyyy-MM-dd");
+                        var sbStartDate = string.Empty;
+
+                        if (!string.IsNullOrEmpty(dr[SBStartDatePos].ToString())) {
+                            sbStartDate = Convert.ToDateTime(dr[SBStartDatePos]).ToString("yyyy-MM-dd");
+                        }
+                        
                         var sbSubject = "PAYMENTSUBJECT04";
                         var sbRateId = SBRateIDPos == -1 ? string.Empty : dr[SBRateIDPos].ToString();
                         var sbDetailID = InitObject.GetUUID();
                         var sbBillMoney = new decimal(0);
+
+                        var IsExistSchoolBus = false;
+                        var SchoolBusRefInfo = new StudentPaymentPlanRefInfo();
+
+
+                        // Is exist ref
+
+                        SchoolBusRefInfo = GetStudentPaymentPlanRefInfo(StudentPaymentId, "PAYMENTSUBJECT04");
+
+                        if (!string.IsNullOrEmpty(SchoolBusRefInfo.id))
+                        {
+                            IsExistSchoolBus = true;
+                            sbDetailID = SchoolBusRefInfo.id;
+                        }
 
                         // Get RateId
                         if (!string.IsNullOrEmpty(sbMoney) && Convert.ToDecimal(sbMoney) > 0)
@@ -1574,17 +1940,21 @@ namespace KMISHelper.Business
                         }
 
 
-
                         if (!string.IsNullOrEmpty(sbMoney) && Convert.ToDecimal(sbMoney) > 0 && !string.IsNullOrEmpty(sbRateId) && PaymentResult > 0 && BillResult > 0)
                         {
 
-                            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, sbDetailID, sbRateId, BatchNo, StudentPaymentId, PaymentMethod, sbSubject, Convert.ToDecimal(sbMoney), "", "", 0, 0, 1, BznsBase.UserID, CreateDate, sbStartDate, 0);
-                            DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
-                            DescBuilder.Append(string.Format("【校车费: {0}/月 ，缴费方式:{1}，标准:{2} 】", DescMonthlyPrice, "月", DescAlias));
+                            if (!IsExistSchoolBus) {
+                                Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, sbDetailID, sbRateId, BatchNo, StudentPaymentId, PaymentMethod, sbSubject, Convert.ToDecimal(sbMoney), "", "", 0, 0, 1, BznsBase.UserID, CreateDate, sbStartDate, 0);
+                                DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+                                DescBuilder.Append(string.Format("【校车费: {0}/月 ，缴费方式:{1}，标准:{2} 】", DescMonthlyPrice, "月", DescAlias));
+                            }
 
+                           
                             foreach (MoneyInfo mi in sbmi)
                             {
-                                if (!string.IsNullOrEmpty(dr[mi.MoneyPos].ToString())) sbBillMoney += Convert.ToDecimal(dr[mi.MoneyPos]);
+                                if (!string.IsNullOrEmpty(dr[mi.MoneyPos].ToString()) && Convert.ToDecimal(dr[mi.MoneyPos]) > 0) {
+                                    sbBillMoney += Convert.ToDecimal(dr[mi.MoneyPos]);
+                                }  
                             }
 
                             // Insert into bill ref
@@ -1607,7 +1977,6 @@ namespace KMISHelper.Business
 
                             // Insert into bill plan.
 
-
                             var i = 0;
                             var IsFirstMonth = true;
                             foreach (KeyValuePair<string, MonthInfo> kv in MonthDict)
@@ -1619,15 +1988,21 @@ namespace KMISHelper.Business
                                     var val = kv.Value;
                                     var BillPlanID = InitObject.GetUUID();
                                     var FirstMonth = "N";
-                                    var Money = dr[sbmi[i].MoneyPos];
+                                    var Money = Convert.ToDecimal( dr[sbmi[i].MoneyPos]);
 
                                     if (IsFirstMonth)
                                     {
                                         FirstMonth = "Y";
                                     }
 
-
-                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, sbSubject, sbDetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, Convert.ToDecimal(Money), 0, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                                    if (Money < -1)
+                                    {
+                                        Money = Money * -1;
+                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, sbSubject, sbDetailID, 0, FirstMonth, "Y", "N", CreateDate, val.StudyDays, Convert.ToDecimal(sbMoney), Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                                    }
+                                    else {
+                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, sbSubject, sbDetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, Convert.ToDecimal(sbMoney), Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                                    }
 
                                     if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
                                     {
@@ -1648,91 +2023,51 @@ namespace KMISHelper.Business
 
                         #region other
 
-                            // Insert Once Fee
-                            foreach (var info in omi)
+                        // Insert Once Fee
+                        foreach (var info in omi)
+                        {
+
+                            var ofMoney = int.Parse(info.Key.ToString()) == -1 ? string.Empty : dr[int.Parse(info.Key.ToString())].ToString();
+                            var ofSubject = "PAYMENTSUBJECT03";
+
+                            if (!string.IsNullOrEmpty(ofMoney) && Convert.ToDecimal(ofMoney) > 0)
                             {
 
-
-                                var ofMoney = int.Parse(info.Key.ToString()) == -1 ? string.Empty : dr[int.Parse(info.Key.ToString())].ToString();
-                                var ofRateID = string.Empty;
-                                var ofDescAlias = string.Empty;
-                                var ofDescMonthlyPrice = new decimal(0);
-                                var ofSubject = "PAYMENTSUBJECT03";
-                                var ofDetailID = InitObject.GetUUID();
-
-                                if (!string.IsNullOrEmpty(ofMoney) && Convert.ToDecimal(ofMoney) > 0)
+                                if (PaymentResult > 0 && BillResult > 0)
                                 {
+                                    
+                                    // Insert into bill ref.
+                                    var BillRefId = InitObject.GetUUID();
+                                    var BillNo = InitObject.GetBillNo(CreateDate, ofSubject);
+                                    var BillStatus = "PAYMENTSTATE01";
 
-
-
-                                    //Sql = string.Format(InitObject.GetScriptServiceInstance().GetRateIdByKMS, Convert.ToDecimal(ofMoney), ofSubject, KindergartenId, myYearInfo.YearID);
-                                    //dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
-
-                                    Sql = string.Format(InitObject.GetScriptServiceInstance().GetRateIdByAliasName, ofSubject,BznsBase.KindergartenId, YearID, info.Value);
-                                    dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
-
-                                    if (dt.Rows.Count >= 1)
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRefNoInit, BillRefId, BillID, ofSubject, BillNo, string.Empty, BillMonth, BillStatus, CreateDate, Convert.ToDecimal(ofMoney));
+                                    if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
                                     {
-                                        foreach (DataRow row in dt.Rows)
-                                        {
-                                            ofRateID = row["rates_id"].ToString();
-                                            ofDescAlias = row["rates_alias"].ToString();
-                                            ofDescMonthlyPrice = Convert.ToDecimal(row["rates_monthly"]);
-                                            ofm.Add(ofMoney);
-                                        }
+                                        SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill ref insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Once Fee")));
                                     }
-
-                                    if (!string.IsNullOrEmpty(ofRateID) && PaymentResult > 0 && BillResult > 0)
-                                    {
-                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertStudentPaymentRef, ofDetailID, ofRateID, BatchNo, StudentPaymentId, "", ofSubject, Convert.ToDecimal(ofMoney), "", "", 0, 0, 1, BznsBase.UserID, CreateDate, CreateDate, 0);
-                                        DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
-                                        DescBuilder.Append(string.Format("【{0}: {1} ，标准:{1} 】", ofDescAlias, ofDescMonthlyPrice, ofDescAlias));
-
-                                        // Insert into bill ref.
-                                        var BillRefId = InitObject.GetUUID();
-                                        var BillNo = InitObject.GetBillNo(CreateDate, ofSubject);
-                                        var BillStatus = "PAYMENTSTATE01";
-
-                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillRefNoInit, BillRefId, BillID, ofSubject, BillNo, ofDetailID, BillMonth, BillStatus, CreateDate, Convert.ToDecimal(ofMoney));
-                                        if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                        {
-                                            SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill ref insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Once Fee")));
-                                        }
-
-                                        // Insert into bill plan.
-                                        var BillPlanID = InitObject.GetUUID();
-
-                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillNoLoop, BillPlanID, BillNo, ofSubject, ofDetailID, 1, "N", "Y", "N", CreateDate, 0, Convert.ToDecimal(ofMoney), Convert.ToDecimal(ofMoney));
-
-                                        if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                        {
-                                            SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Once Fee")));
-                                        }
-
+                                    else {
+                                        ofm.Add(ofMoney);
                                     }
-                                    else
-                                    {
-                                        SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " dont find once fee rate."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Once Fee")));
-                                    }
-
-
 
                                 }
-                                else
-                                {
-                                    SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " dont set once fee or <= 0."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Once Fee")));
-                                }
-                                // End Insert Once Fee
 
                             }
 
+                        }
+
                         #endregion
 
-                        // update payment plan
-                        Sql = string.Format(InitObject.GetScriptServiceInstance().UpdateStudentPayment, DescBuilder.ToString(), StudentPaymentId);
-                        DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
 
-                        var sum = TotalMoney(BillMoney, mBillMoney,sbBillMoney,ofm,PerTuitionFeeMoney);
+
+                        // update payment plan if not is append
+
+                        if (!IsAppend) {
+                            Sql = string.Format(InitObject.GetScriptServiceInstance().UpdateStudentPayment, DescBuilder.ToString(), StudentPaymentId);
+                            DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
+                        }
+
+                        var sum = TotalMoney(BillMoney, mBillMoney, sbBillMoney, ofm, PerTuitionFeeMoney);
                         Sql = string.Format(InitObject.GetScriptServiceInstance().UpdateFinBill, sum, 0, BillID);
                         DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
 
@@ -1764,13 +2099,15 @@ namespace KMISHelper.Business
             return result;
         }
 
-        private decimal TotalMoney(decimal tm, decimal mm,decimal sbm,List<string> ofMoneys, string ptMoney) {
+        private decimal TotalMoney(decimal tm, decimal mm, decimal sbm, List<string> ofMoneys, string ptMoney)
+        {
 
             var sum = new decimal(0);
 
             try
             {
-                if (!string.IsNullOrEmpty(ptMoney)) {
+                if (!string.IsNullOrEmpty(ptMoney))
+                {
                     sum += Convert.ToDecimal(ptMoney);
                 }
 
@@ -1794,7 +2131,8 @@ namespace KMISHelper.Business
             return sum;
         }
 
-        private StudentBalanceAccountInfo GetStudentBalanceAccountInfo(string sid) {
+        private StudentBalanceAccountInfo GetStudentBalanceAccountInfo(string sid)
+        {
 
             var SBAInfo = new StudentBalanceAccountInfo();
 
@@ -1813,7 +2151,8 @@ namespace KMISHelper.Business
                     SBAInfo.AvlAmt = Convert.ToDecimal(dt.Rows[0]["avl_amt"].ToString());
                     SBAInfo.IsNone = false;
                 }
-                else {
+                else
+                {
                     SBAInfo.IsNone = true;
                 }
 
@@ -1823,7 +2162,8 @@ namespace KMISHelper.Business
 
                 throw;
             }
-            finally {
+            finally
+            {
 
             }
 
@@ -1831,7 +2171,8 @@ namespace KMISHelper.Business
 
         }
 
-        private ExistAccountInfo GetStudentAllAccount(string sid) {
+        private ExistAccountInfo GetStudentAllAccount(string sid)
+        {
 
             var EAInfo = new ExistAccountInfo
             {
@@ -1844,7 +2185,7 @@ namespace KMISHelper.Business
                 TuitionAccountId = string.Empty,
                 MealesAccountId = string.Empty,
                 SchoolBusAccountId = string.Empty,
-                OtherAccountId = string.Empty 
+                OtherAccountId = string.Empty
             };
 
             try
@@ -1906,18 +2247,431 @@ namespace KMISHelper.Business
 
         }
 
-        public void Write(string sno)
+        private StudentPaymentPlanInfo GetStudentPaymentPlanInfoBySID(string sid)
         {
-            //FileMode.Append为不覆盖文件效果.create为覆盖
-            FileStream fs = new FileStream(@"C:\Doyen\Export\log.txt", FileMode.Create);
-            //获得字节数组
-            byte[] data = System.Text.Encoding.Default.GetBytes(sno);
-            //开始写入
+
+            var ret = new StudentPaymentPlanInfo();
+
+            try
+            {
+                var Sql = string.Format(InitObject.GetScriptServiceInstance().GetStudentPaymentPlanInfoBySID, sid);
+                var dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
+
+                if (dt.Rows.Count > 0)
+                {
+                    ret.id = Convert.ToInt32(dt.Rows[0]["id"]);
+                    ret.rates_id = dt.Rows[0]["rates_id"].ToString();
+                    ret.student_id = dt.Rows[0]["student_id"].ToString();
+                    ret.student_payment_id = dt.Rows[0]["student_payment_id"].ToString();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return ret;
+        }
+
+        private StudentPaymentPlanRefInfo GetStudentPaymentPlanRefInfo(string sppid, string subject)
+        {
+
+            var ret = new StudentPaymentPlanRefInfo();
+
+            try
+            {
+                var Sql = string.Format(InitObject.GetScriptServiceInstance().GetStudentPaymentPlanRefInfoBySPPIDAndSubject, sppid, subject);
+                var dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
+                if (dt.Rows.Count > 0)
+                {
+                    ret.id = dt.Rows[0]["id"].ToString();
+                    ret.rates_id = dt.Rows[0]["rates_id"].ToString();
+                    ret.batch_number = dt.Rows[0]["batch_number"].ToString();
+                    ret.pay_discount_id = dt.Rows[0]["pay_discount_id"].ToString();
+                    ret.payment_discount = dt.Rows[0]["payment_discount"].ToString();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return ret;
+
+        }
+
+        private bool IsExistBillPlan(string Subject, string StartDate, string EndDate, string StudentPaymentRefId)
+        {
+            var ret = false;
+            try
+            {
+                var Sql = string.Format(InitObject.GetScriptServiceInstance().GetBillPlanBySubjectAndStartDateAndEndDate, StartDate, EndDate, Subject, StudentPaymentRefId);
+                var dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
+                if (dt.Rows.Count > 0)
+                {
+                    ret = true;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return ret;
+        }
+
+        private RatesInfo GetRatesInfoByID(string rid)
+        {
+            var ret = new RatesInfo();
+            try
+            {
+                var Sql = string.Format(InitObject.GetScriptServiceInstance().GetRatesByID, rid);
+                var dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, Sql, null).Tables[0];
+                if (dt.Rows.Count > 0)
+                {
+                    ret.id = Convert.ToInt32(dt.Rows[0]["id"]);
+                    ret.rates_alias = dt.Rows[0]["rates_alias"].ToString();
+                    ret.rates_monthly = Convert.ToDecimal(dt.Rows[0]["rates_monthly"].ToString());
+                    ret.rates_id = dt.Rows[0]["rates_id"].ToString();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return ret;
+        }
+
+        private bool ExistStudentPaymentPlan(ExistAccountInfo SA)
+        {
+            var ret = true;
+            try
+            {
+                if (SA.IsExistTuitionAccount || SA.IsExistMealsAccount || SA.IsExistSchoolBusAccount || SA.IsExistPreAccount || SA.IsExistOtherAccount)
+                {
+                    ret = false;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return ret;
+        }
+
+        public bool UpdateRef(List<string> klist) {
+
+            var ret = false;
+
+            try
+            {
+
+                foreach (string k in klist)
+                {
+
+
+                    try
+                    {
+
+                        WriteForManual(k, " start....",k + ".txt");
+
+                        var sql = string.Format(InitObject.GetScriptServiceInstance().GetStudentsForUpdate, k);
+                        var students = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, sql, null).Tables[0];
+
+                        foreach (DataRow s in students.Rows)
+                        {
+
+                            var sid = s["stu_id"].ToString();
+                            var tid = string.Empty;
+                            var mid = string.Empty;
+                            var sbid = string.Empty;
+
+                            var sppSql = string.Empty;
+                            var sppDelSql = string.Empty;
+                            var sppDt = new DataTable();
+                            var sppid = string.Empty;
+                            var sppTotal = 0;
+
+                            var spprDelSql = string.Empty;
+                            var spprUpdateSql = string.Empty;
+
+
+                            // get student payment plan
+
+                            sppSql = string.Format(InitObject.GetScriptServiceInstance().GetSPPForUpdate, sid);
+                            sppDt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, sppSql, null).Tables[0];
+
+                            sppTotal = sppDt.Rows.Count;
+
+                            if (sppTotal > 0)
+                            {
+
+                                sppid = sppDt.Rows[0]["student_payment_id"].ToString();
+
+                            }
+
+                            // delete and update of 3,5 student payment plan ref via sppid
+
+                            foreach (DataRow spp in sppDt.Rows)
+                            {
+
+                                spprDelSql = string.Format(InitObject.GetScriptServiceInstance().DeleteSPPRForUpdate, spp["student_payment_id"].ToString());
+                                DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, spprDelSql, null);
+
+                                spprUpdateSql = string.Format(InitObject.GetScriptServiceInstance().UpdateSPPRForUpdate, sppid, spp["student_payment_id"].ToString());
+                                DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, spprUpdateSql, null);
+
+                            }
+
+                            // delete student payment plan ref via sppid
+
+                            if (!DeleteRepeat(sppid, "PAYMENTSUBJECT01"))
+                            {
+                                WriteForManual(sid, " Repat PAYMENTSUBJECT01", k + ".txt");
+                                if (sppTotal > 1)
+                                {
+                                    sppDelSql = string.Format(InitObject.GetScriptServiceInstance().DeleteSPPForUpdate, sid, sppid);
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, sppDelSql, null);
+                                }
+                                continue;
+                            }
+
+                            if (!DeleteRepeat(sppid, "PAYMENTSUBJECT02"))
+                            {
+                                WriteForManual(sid, " Repat PAYMENTSUBJECT02", k + ".txt");
+                                if (sppTotal > 1)
+                                {
+                                    sppDelSql = string.Format(InitObject.GetScriptServiceInstance().DeleteSPPForUpdate, sid, sppid);
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, sppDelSql, null);
+                                }
+                                continue;
+                            }
+
+                            if (!DeleteRepeat(sppid, "PAYMENTSUBJECT04"))
+                            {
+                                WriteForManual(sid, " Repat PAYMENTSUBJECT04", k + ".txt");
+                                if (sppTotal > 1)
+                                {
+                                    sppDelSql = string.Format(InitObject.GetScriptServiceInstance().DeleteSPPForUpdate, sid, sppid);
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, sppDelSql, null);
+                                }
+                                continue;
+                            }
+
+                            // get new refs, one student just 3 reocrds.
+
+                            var refsql = string.Format(InitObject.GetScriptServiceInstance().GetNewSPPRForUpdate, sppid);
+                            var refdt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, refsql, null).Tables[0];
+
+                            foreach (DataRow r in refdt.Rows)
+                            {
+
+                                if (r["payment_rule_subject"].ToString() == "PAYMENTSUBJECT01")
+                                {
+                                    tid = r["id"].ToString();
+                                }
+
+                                if (r["payment_rule_subject"].ToString() == "PAYMENTSUBJECT02")
+                                {
+                                    mid = r["id"].ToString();
+                                }
+
+                                if (r["payment_rule_subject"].ToString() == "PAYMENTSUBJECT04")
+                                {
+                                    sbid = r["id"].ToString();
+                                }
+
+                            }
+
+                            // get bill ref via student id
+
+                            var billrefSql = string.Format(InitObject.GetScriptServiceInstance().GetBillRefByBillIDForUpdate, sid);
+                            var billrefdt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, billrefSql, null).Tables[0];
+
+                            foreach (DataRow br in billrefdt.Rows)
+                            {
+
+                                if (br["bill_type"].ToString() == "PAYMENTSUBJECT01")
+                                {
+                                    var DeleteBillRefSql = string.Format(InitObject.GetScriptServiceInstance().UpdateBillRefByIDForUpdate, tid, Convert.ToInt32(br["id"]));
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, DeleteBillRefSql, null);
+                                }
+
+                                if (br["bill_type"].ToString() == "PAYMENTSUBJECT02")
+                                {
+                                    var DeleteBillRefSql = string.Format(InitObject.GetScriptServiceInstance().UpdateBillRefByIDForUpdate, mid, Convert.ToInt32(br["id"]));
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, DeleteBillRefSql, null);
+                                }
+
+                                if (br["bill_type"].ToString() == "PAYMENTSUBJECT03")
+                                {
+                                    var DeleteBillRefSql = string.Format(InitObject.GetScriptServiceInstance().UpdateBillRefByIDForUpdate, string.Empty, Convert.ToInt32(br["id"]));
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, DeleteBillRefSql, null);
+                                }
+
+                                if (br["bill_type"].ToString() == "PAYMENTSUBJECT04")
+                                {
+                                    var DeleteBillRefSql = string.Format(InitObject.GetScriptServiceInstance().UpdateBillRefByIDForUpdate, sbid, Convert.ToInt32(br["id"]));
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, DeleteBillRefSql, null);
+                                }
+
+                                if (br["bill_type"].ToString() == "PAYMENTSUBJECT05")
+                                {
+                                    var DeleteBillRefSql = string.Format(InitObject.GetScriptServiceInstance().UpdateBillRefByIDForUpdate, string.Empty, Convert.ToInt32(br["id"]));
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, DeleteBillRefSql, null);
+                                }
+
+                            }
+
+                            // delete student payment plan if record greater than 1 
+
+                            if (sppTotal > 1)
+                            {
+                                sppDelSql = string.Format(InitObject.GetScriptServiceInstance().DeleteSPPForUpdate, sid, sppid);
+                                DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, sppDelSql, null);
+                            }
+
+                        }
+
+                        WriteForManual(k, " end....", k + ".txt");
+
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteForManual(k, " error.... " + ex.Message.ToString(), k + ".txt");
+                        throw;
+                    }
+
+                    
+                   
+
+                }
+
+            }
+            catch (Exception e)
+            {
+
+            }
+            finally
+            {
+
+            }
+
+            return ret;
+        }
+
+        public bool DeleteData()
+        {
+
+            var ret = true;
+            var sql = string.Empty;
+
+            try
+            {
+
+                sql = string.Format(InitObject.GetScriptServiceInstance().DeleteSPP, BznsBase.KindergartenId);
+                DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, sql, null);
+
+                sql = string.Empty;
+
+                sql = string.Format(InitObject.GetScriptServiceInstance().DeleteSPPR, BznsBase.KindergartenId);
+                DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, sql, null);
+
+                sql = string.Empty;
+
+                sql = string.Format(InitObject.GetScriptServiceInstance().DeleteFB, BznsBase.KindergartenId);
+                DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, sql, null);
+
+
+            }
+            catch (Exception e)
+            {
+                ret = false;
+            }
+            finally
+            {
+
+            }
+
+            return ret;
+        }
+
+        public bool DeleteRepeat(string sppid, string subject) {
+
+            var ret = true;
+            var sql = string.Empty;
+            var dt = new DataTable();
+            var rid = string.Empty;
+
+            try
+            {
+                sql = string.Format(InitObject.GetScriptServiceInstance().GetSPPRBySubjectAndSPPIDForUpdate, sppid, subject);
+                dt = DBHelper.MySqlHelper.GetDataSet(BznsBase.GetConnectionString, BznsBase.GetCommandType, sql, null).Tables[0];
+
+                if (dt.Rows.Count > 1) {
+
+                    rid = dt.Rows[0]["rates_id"].ToString();
+
+                    foreach (DataRow dr in dt.Rows) {
+
+                        if (dr["rates_id"].ToString() != rid) {
+                            ret = false;
+                        }
+                    }
+
+                    if (ret) {
+
+                        // delete from 2 to end record.
+
+                        for (int i = 1; i < dt.Rows.Count; i++) {
+                            sql = string.Format(InitObject.GetScriptServiceInstance().DeleteSPPRBySubjectAndSPPIDForUpdate, dt.Rows[i]["id"].ToString());
+                            DBHelper.MySqlHelper.ExecuteNonQuery(BznsBase.GetConnectionString, BznsBase.GetCommandType, sql, null);
+                        }
+                        
+                    }
+
+                }
+
+            }
+            catch (Exception)
+            {
+                ret = false;
+                throw;
+            }
+            finally {
+
+            }
+
+            return ret;
+
+        }
+
+        public void Write(string sno, string desc = "",string fn = "")
+        {
+            FileStream fs = new FileStream(@"C:\Users\Jack\Desktop\Import V3\Import Log\" + fn + "_log.txt", FileMode.Append);
+            var d = string.Concat(Convert.ToString(DateTime.Now), " ", sno, desc, "\r\n");
+            byte[] data = System.Text.Encoding.Default.GetBytes(d);
+            fs.Position = fs.Length;
             fs.Write(data, 0, data.Length);
-            //清空缓冲区、关闭流
             fs.Flush();
             fs.Close();
         }
+
+        public void WriteForManual(string sno, string desc = "", string fn = "")
+        {
+            FileStream fs = new FileStream(@"C:\Users\Jack\Desktop\Import V3\Import Log\" + fn + "_manual.txt", FileMode.Append);
+            var d = string.Concat(Convert.ToString(DateTime.Now), " ", sno, desc, "\r\n");
+            byte[] data = System.Text.Encoding.Default.GetBytes(d);
+            fs.Position = fs.Length;
+            fs.Write(data, 0, data.Length);
+            fs.Flush();
+            fs.Close();
+        }
+
 
     }
 

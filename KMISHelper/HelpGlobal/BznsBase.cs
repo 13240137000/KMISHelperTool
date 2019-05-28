@@ -34,6 +34,8 @@ namespace KMISHelper.HelpGlobal
 
         public static readonly string ImportFinanceSheetName = ConfigurationManager.AppSettings["ImportFinanceSheetName"].ToString();
 
+        public static readonly string ImportAllFinanceSheetName = ConfigurationManager.AppSettings["ImportAllFinanceSheetName"].ToString();
+
         public static readonly string ImportInterestClassSheetName = ConfigurationManager.AppSettings["ImportInterestClassSheetName"].ToString();
 
         public static readonly string ImportInterestClassFinanceSheetName = ConfigurationManager.AppSettings["ImportInterestClassFinanceSheetName"].ToString();

@@ -85,7 +85,7 @@ namespace KMISHelper.Forms
             ptRateID.DisplayMember = "Value";
             ptRateID.ValueMember = "Key";
 
-            // Pload p
+            // load t
 
             tMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
             tMoney.DisplayMember = "Value";
@@ -111,6 +111,10 @@ namespace KMISHelper.Forms
             tMoney5.DisplayMember = "Value";
             tMoney5.ValueMember = "Key";
 
+            tMoney6.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
+            tMoney6.DisplayMember = "Value";
+            tMoney6.ValueMember = "Key";
+
             tRateID.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
             tRateID.DisplayMember = "Value";
             tRateID.ValueMember = "Key";
@@ -118,6 +122,18 @@ namespace KMISHelper.Forms
             tStartDate.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
             tStartDate.DisplayMember = "Value";
             tStartDate.ValueMember = "Key";
+
+            DiscountId.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
+            DiscountId.DisplayMember = "Value";
+            DiscountId.ValueMember = "Key";
+
+            DiscountMoney.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
+            DiscountMoney.DisplayMember = "Value";
+            DiscountMoney.ValueMember = "Key";
+
+            DiscountType.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
+            DiscountType.DisplayMember = "Value";
+            DiscountType.ValueMember = "Key";
 
             // Load m
 
@@ -144,6 +160,10 @@ namespace KMISHelper.Forms
             mMoney5.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
             mMoney5.DisplayMember = "Value";
             mMoney5.ValueMember = "Key";
+
+            mMoney6.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
+            mMoney6.DisplayMember = "Value";
+            mMoney6.ValueMember = "Key";
 
             mRateID.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
             mRateID.DisplayMember = "Value";
@@ -182,6 +202,10 @@ namespace KMISHelper.Forms
             sbMoney5.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
             sbMoney5.DisplayMember = "Value";
             sbMoney5.ValueMember = "Key";
+
+            sbMoney6.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
+            sbMoney6.DisplayMember = "Value";
+            sbMoney6.ValueMember = "Key";
 
             sbRateID.DataSource = ExcelHelper.ExcelHelper.GetExcelHeader(FileName, BznsBase.ImportForShangHai);
             sbRateID.DisplayMember = "Value";
@@ -229,6 +253,7 @@ namespace KMISHelper.Forms
             sbStartDate.DisplayMember = "Value";
             sbStartDate.ValueMember = "Key";
 
+
             if (BznsBase.EnableMappingField)
             {
 
@@ -246,9 +271,13 @@ namespace KMISHelper.Forms
                 tMoney3.Text = "学费3";
                 tMoney4.Text = "学费4";
                 tMoney5.Text = "学费5";
+                tMoney6.Text = "学费6";
                 tRateID.Text = "学费标准ID";
                 tStartDate.Text = "学费开始日期";
                 tMonth.Text = "学费月";
+                DiscountId.Text = "折扣ID";
+                DiscountMoney.Text = "折扣金额";
+                DiscountType.Text = "折扣类型";
 
                 mMoney.Text = "餐费标准";
                 mMoney1.Text = "餐费1";
@@ -256,6 +285,7 @@ namespace KMISHelper.Forms
                 mMoney3.Text = "餐费3";
                 mMoney4.Text = "餐费4";
                 mMoney5.Text = "餐费5";
+                mMoney6.Text = "餐费6";
                 mRateID.Text = "餐费标准ID";
                 mStartDate.Text = "餐费开始日期";
                 mMonth.Text = "餐费月";
@@ -266,6 +296,7 @@ namespace KMISHelper.Forms
                 sbMoney3.Text = "校车费3";
                 sbMoney4.Text = "校车费4";
                 sbMoney5.Text = "校车费5";
+                sbMoney6.Text = "校车费6";
                 sbRateID.Text = "校车费标准ID";
                 sbStartDate.Text = "校车费开始日期";
                 sbMonth.Text = "校车月";
@@ -309,9 +340,13 @@ namespace KMISHelper.Forms
             var TMoney3Pos = Convert.ToInt32(tMoney3.SelectedValue);
             var TMoney4Pos = Convert.ToInt32(tMoney4.SelectedValue);
             var TMoney5Pos = Convert.ToInt32(tMoney5.SelectedValue);
+            var TMoney6Pos = Convert.ToInt32(tMoney6.SelectedValue);
             var TRateIDPos = Convert.ToInt32(tRateID.SelectedValue);
             var TStartDatePos = Convert.ToInt32(tStartDate.SelectedValue);
             var TMonthPos = Convert.ToInt32(tMonth.SelectedValue);
+            var DiscountIdPos = Convert.ToInt32(DiscountId.SelectedValue);
+            var DiscountMoneyPos = Convert.ToInt32(DiscountMoney.SelectedValue);
+            var DiscountTypePos = Convert.ToInt32(DiscountType.SelectedValue);
 
             var MMoneyPos = Convert.ToInt32(mMoney.SelectedValue);
             var MMoney1Pos = Convert.ToInt32(mMoney1.SelectedValue);
@@ -319,6 +354,7 @@ namespace KMISHelper.Forms
             var MMoney3Pos = Convert.ToInt32(mMoney3.SelectedValue);
             var MMoney4Pos = Convert.ToInt32(mMoney4.SelectedValue);
             var MMoney5Pos = Convert.ToInt32(mMoney5.SelectedValue);
+            var MMoney6Pos = Convert.ToInt32(mMoney6.SelectedValue);
             var MRateIDPos = Convert.ToInt32(mRateID.SelectedValue);
             var MStartDatePos = Convert.ToInt32(mStartDate.SelectedValue);
             var MMonthPos = Convert.ToInt32(mMonth.SelectedValue);
@@ -329,6 +365,7 @@ namespace KMISHelper.Forms
             var SBMoney3Pos = Convert.ToInt32(sbMoney3.SelectedValue);
             var SBMoney4Pos = Convert.ToInt32(sbMoney4.SelectedValue);
             var SBMoney5Pos = Convert.ToInt32(sbMoney5.SelectedValue);
+            var SBMoney6Pos = Convert.ToInt32(sbMoney6.SelectedValue);
             var SBRateIDPos = Convert.ToInt32(sbRateID.SelectedValue);
             var SBStartDatePos = Convert.ToInt32(sbStartDate.SelectedValue);
             var SBMonthPos = Convert.ToInt32(sbMonth.SelectedValue);
@@ -368,6 +405,11 @@ namespace KMISHelper.Forms
                 tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney5Pos"), MoneyPos = TMoney5Pos });
             }
 
+            if (TMoney6Pos != -1)
+            {
+                tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney6Pos"), MoneyPos = TMoney6Pos });
+            }
+
             var mmi = new List<MoneyInfo>();
 
             if (MMoney1Pos != -1)
@@ -395,6 +437,11 @@ namespace KMISHelper.Forms
                 mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney5Pos"), MoneyPos = MMoney5Pos });
             }
 
+            if (MMoney6Pos != -1)
+            {
+                mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney6Pos"), MoneyPos = MMoney6Pos });
+            }
+
             var sbmi = new List<MoneyInfo>();
 
             if (SBMoney1Pos != -1)
@@ -420,6 +467,11 @@ namespace KMISHelper.Forms
             if (SBMoney5Pos != -1)
             {
                 sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney5Pos"), MoneyPos = SBMoney5Pos });
+            }
+
+            if (SBMoney6Pos != -1)
+            {
+                sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney6Pos"), MoneyPos = SBMoney6Pos });
             }
 
             var omi = new List<OnceInfo>();
@@ -462,7 +514,7 @@ namespace KMISHelper.Forms
             try
             {
 
-                Result = GetFinanceInstance().InsertForShanghai(IsTry2Import, Students, StudentNoPos, YearPos, StartDatePos, PTMoneyPos, PTRateIDPos, TMoneyPos, TRateIDPos, TStartDatePos, tmi, MMoneyPos, MRateIDPos, MStartDatePos, mmi, SBMoneyPos, SBRateIDPos, SBStartDatePos, sbmi, omi, TMonthPos, MMonthPos, SBMonthPos);
+                Result = GetFinanceInstance().InsertForShanghai(IsTry2Import, Students, StudentNoPos, YearPos, StartDatePos, PTMoneyPos, PTRateIDPos, TMoneyPos, TRateIDPos, TStartDatePos, tmi, MMoneyPos, MRateIDPos, MStartDatePos, mmi, SBMoneyPos, SBRateIDPos, SBStartDatePos, sbmi, omi, TMonthPos, MMonthPos, SBMonthPos, DiscountIdPos,DiscountMoneyPos, DiscountTypePos);
 
                 if (Result && !IsTry2Import)
                 {
@@ -487,26 +539,27 @@ namespace KMISHelper.Forms
         }
 
         private string GetMonth(string name) {
+
             var m = int.Parse(name.Substring(name.Length - 4).Substring(0,1));
             var ret = string.Empty;
             switch (m) {
                 case 1:
-                    ret = "2018/09/01";
+                    ret = "2019/02/01";
                     break;
                 case 2:
-                    ret = "2018/10/01";
+                    ret = "2019/03/01";
                     break;
                 case 3:
-                    ret = "2018/11/01";
+                    ret = "2019/04/01";
                     break;
                 case 4:
-                    ret = "2018/12/01";
+                    ret = "2019/05/01";
                     break;
                 case 5:
-                    ret = "2019/01/01";
+                    ret = "2019/06/01";
                     break;
-                default:
-                    ret = "2019/02/01";
+                case 6:
+                    ret = "2019/07/01";
                     break;
             }
             return ret;
