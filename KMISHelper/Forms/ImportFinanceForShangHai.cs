@@ -382,99 +382,230 @@ namespace KMISHelper.Forms
 
             if (TMoney1Pos != -1)
             {
-                tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney1Pos"), MoneyPos = TMoney1Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    tmi.Add(new MoneyInfo() { Month = GetMonthForInit("TMoney1Pos"), MoneyPos = TMoney1Pos });
+                }
+                else {
+                    tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney1Pos"), MoneyPos = TMoney1Pos });
+                }
+                
             }
 
             if (TMoney2Pos != -1)
             {
-                tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney2Pos"), MoneyPos = TMoney2Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    tmi.Add(new MoneyInfo() { Month = GetMonthForInit("TMoney2Pos"), MoneyPos = TMoney2Pos });
+                }
+                else
+                {
+                    tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney2Pos"), MoneyPos = TMoney2Pos });
+                }
             }
 
             if (TMoney3Pos != -1)
             {
-                tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney3Pos"), MoneyPos = TMoney3Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    tmi.Add(new MoneyInfo() { Month = GetMonthForInit("TMoney3Pos"), MoneyPos = TMoney3Pos });
+                }
+                else
+                {
+                    tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney3Pos"), MoneyPos = TMoney3Pos });
+                }
             }
 
             if (TMoney4Pos != -1)
             {
-                tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney4Pos"), MoneyPos = TMoney4Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    tmi.Add(new MoneyInfo() { Month = GetMonthForInit("TMoney4Pos"), MoneyPos = TMoney4Pos });
+                }
+                else
+                {
+                    tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney4Pos"), MoneyPos = TMoney4Pos });
+                }
             }
 
             if (TMoney5Pos != -1)
             {
-                tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney5Pos"), MoneyPos = TMoney5Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    tmi.Add(new MoneyInfo() { Month = GetMonthForInit("TMoney5Pos"), MoneyPos = TMoney5Pos });
+                }
+                else
+                {
+                    tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney5Pos"), MoneyPos = TMoney5Pos });
+                }
             }
 
             if (TMoney6Pos != -1)
             {
-                tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney6Pos"), MoneyPos = TMoney6Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    
+                }
+                else
+                {
+                    tmi.Add(new MoneyInfo() { Month = GetMonth("TMoney6Pos"), MoneyPos = TMoney6Pos });
+                }
             }
 
             var mmi = new List<MoneyInfo>();
 
             if (MMoney1Pos != -1)
             {
-                mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney1Pos"), MoneyPos = MMoney1Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    mmi.Add(new MoneyInfo() { Month = GetMonthForInit("MMoney1Pos"), MoneyPos = MMoney1Pos });
+                }
+                else {
+                    mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney1Pos"), MoneyPos = MMoney1Pos });
+                }
             }
 
             if (MMoney2Pos != -1)
             {
-                mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney2Pos"), MoneyPos = MMoney2Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    mmi.Add(new MoneyInfo() { Month = GetMonthForInit("MMoney2Pos"), MoneyPos = MMoney2Pos });
+                }
+                else
+                {
+                    mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney2Pos"), MoneyPos = MMoney2Pos });
+                }
             }
 
             if (MMoney3Pos != -1)
             {
-                mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney3Pos"), MoneyPos = MMoney3Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    mmi.Add(new MoneyInfo() { Month = GetMonthForInit("MMoney3Pos"), MoneyPos = MMoney3Pos });
+                }
+                else
+                {
+                    mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney3Pos"), MoneyPos = MMoney3Pos });
+                }
             }
 
             if (MMoney4Pos != -1)
             {
-                mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney4Pos"), MoneyPos = MMoney4Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    mmi.Add(new MoneyInfo() { Month = GetMonthForInit("MMoney4Pos"), MoneyPos = MMoney4Pos });
+                }
+                else
+                {
+                    mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney4Pos"), MoneyPos = MMoney4Pos });
+                }
             }
 
             if (MMoney5Pos != -1)
             {
-                mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney5Pos"), MoneyPos = MMoney5Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    mmi.Add(new MoneyInfo() { Month = GetMonthForInit("MMoney5Pos"), MoneyPos = MMoney5Pos });
+                }
+                else
+                {
+                    mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney5Pos"), MoneyPos = MMoney5Pos });
+                }
             }
 
             if (MMoney6Pos != -1)
             {
-                mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney6Pos"), MoneyPos = MMoney6Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                }
+                else
+                {
+                    mmi.Add(new MoneyInfo() { Month = GetMonth("MMoney6Pos"), MoneyPos = MMoney6Pos });
+                }
             }
 
             var sbmi = new List<MoneyInfo>();
 
+
             if (SBMoney1Pos != -1)
             {
-                sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney1Pos"), MoneyPos = SBMoney1Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    sbmi.Add(new MoneyInfo() { Month = GetMonthForInit("SBMoney1Pos"), MoneyPos = SBMoney1Pos });
+                }
+                else {
+                    sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney1Pos"), MoneyPos = SBMoney1Pos });
+                }
+                
             }
 
             if (SBMoney2Pos != -1)
             {
-                sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney2Pos"), MoneyPos = SBMoney2Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    sbmi.Add(new MoneyInfo() { Month = GetMonthForInit("SBMoney2Pos"), MoneyPos = SBMoney2Pos });
+                }
+                else
+                {
+                    sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney2Pos"), MoneyPos = SBMoney2Pos });
+                }
+
             }
 
             if (SBMoney3Pos != -1)
             {
-                sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney3Pos"), MoneyPos = SBMoney3Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    sbmi.Add(new MoneyInfo() { Month = GetMonthForInit("SBMoney3Pos"), MoneyPos = SBMoney3Pos });
+                }
+                else
+                {
+                    sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney3Pos"), MoneyPos = SBMoney3Pos });
+                }
+
             }
 
             if (SBMoney4Pos != -1)
             {
-                sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney4Pos"), MoneyPos = SBMoney4Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    sbmi.Add(new MoneyInfo() { Month = GetMonthForInit("SBMoney4Pos"), MoneyPos = SBMoney4Pos });
+                }
+                else
+                {
+                    sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney4Pos"), MoneyPos = SBMoney4Pos });
+                }
+
             }
 
             if (SBMoney5Pos != -1)
             {
-                sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney5Pos"), MoneyPos = SBMoney5Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    sbmi.Add(new MoneyInfo() { Month = GetMonthForInit("SBMoney5Pos"), MoneyPos = SBMoney5Pos });
+                }
+                else
+                {
+                    sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney5Pos"), MoneyPos = SBMoney5Pos });
+                }
+
             }
 
             if (SBMoney6Pos != -1)
             {
-                sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney6Pos"), MoneyPos = SBMoney6Pos });
+                if (BznsBase.ImportShangHaiForInit)
+                {
+                    
+                }
+                else
+                {
+                    sbmi.Add(new MoneyInfo() { Month = GetMonth("SBMoney6Pos"), MoneyPos = SBMoney6Pos });
+                }
+
             }
 
             var omi = new List<OnceInfo>();
+
 
             if (OMoney1Pos != -1)
             {
@@ -538,11 +669,13 @@ namespace KMISHelper.Forms
             
         }
 
-        private string GetMonth(string name) {
+        private string GetMonth(string name)
+        {
 
-            var m = int.Parse(name.Substring(name.Length - 4).Substring(0,1));
+            var m = int.Parse(name.Substring(name.Length - 4).Substring(0, 1));
             var ret = string.Empty;
-            switch (m) {
+            switch (m)
+            {
                 case 1:
                     ret = "2019/02/01";
                     break;
@@ -560,6 +693,33 @@ namespace KMISHelper.Forms
                     break;
                 case 6:
                     ret = "2019/07/01";
+                    break;
+            }
+            return ret;
+        }
+
+        private string GetMonthForInit(string name) {
+
+            var m = int.Parse(name.Substring(name.Length - 4).Substring(0,1));
+            var ret = string.Empty;
+            switch (m) {
+                case 1:
+                    ret = "2018/09/01";
+                    break;
+                case 2:
+                    ret = "2018/10/01";
+                    break;
+                case 3:
+                    ret = "2018/11/01";
+                    break;
+                case 4:
+                    ret = "2018/12/01";
+                    break;
+                case 5:
+                    ret = "2019/01/01";
+                    break;
+                default:
+                    ret = "";
                     break;
             }
             return ret;

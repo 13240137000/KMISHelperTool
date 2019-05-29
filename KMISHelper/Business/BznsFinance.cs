@@ -1742,42 +1742,66 @@ namespace KMISHelper.Business
 
                             var i = 0;
                             var IsFirstMonth = true;
-                            foreach (KeyValuePair<string, MonthInfo> kv in MonthDict)
-                            {
 
-                                if (!kv.Key.Equals("summary"))
+                            foreach (MoneyInfo mi in tmi)
+                            {
+                                if (!string.IsNullOrEmpty(dr[mi.MoneyPos].ToString()) && Convert.ToDecimal(dr[mi.MoneyPos]) > 0)
                                 {
-                                    var key = kv.Key;
-                                    var val = kv.Value;
                                     var BillPlanID = InitObject.GetUUID();
                                     var FirstMonth = "N";
-                                    var Money = Convert.ToDecimal(dr[tmi[i].MoneyPos]);
+                                    var Money = Convert.ToDecimal(dr[mi.MoneyPos]);
+                                    var sd = Convert.ToDateTime(mi.Month);
+                                    var md = new Dictionary<string, MonthInfo>();
+                                    md = InitObject.SplitMonth(sd, 1, myClassInfo.CalendarId, YearID);
+                                    KeyValuePair<string, MonthInfo> kvp = md.FirstOrDefault();
 
-                                    if (IsFirstMonth)
-                                    {
-                                        FirstMonth = "Y";
-                                    }
-
-                                    if (Convert.ToDecimal(Money) < -1)
-                                    {
-                                        Money = Money * -1;
-                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, TuitionFeeSubject, DetailID, 0, FirstMonth, "Y", "N", CreateDate, val.StudyDays, TuitionFeeMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
-                                    }
-                                    else {
-                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, TuitionFeeSubject, DetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, TuitionFeeMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
-                                    }
-
-                                    if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                    {
-                                        SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Plan Tuition Fee")));
-                                    }
-
-                                    IsFirstMonth = false;
-                                    i++;
-
+                                    var tsd = md["summary"].StartDate.ToString("yyyy-MM-dd");
+                                    var ted = md["summary"].EndDate.ToString("yyyy-MM-dd");
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, TuitionFeeSubject, DetailID, 1, FirstMonth, "Y", "N", CreateDate, kvp.Value.StudyDays, TuitionFeeMoney, Money, tsd, ted);
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
                                 }
-
+                                IsFirstMonth = false;
+                                i++;
                             }
+
+
+                            
+                            //foreach (KeyValuePair<string, MonthInfo> kv in MonthDict)
+                            //{
+
+                            //    if (!kv.Key.Equals("summary"))
+                            //    {
+                            //        var key = kv.Key;
+                            //        var val = kv.Value;
+                            //        var BillPlanID = InitObject.GetUUID();
+                            //        var FirstMonth = "N";
+                            //        var Money = Convert.ToDecimal(dr[tmi[i].MoneyPos]);
+
+                            //        if (IsFirstMonth)
+                            //        {
+                            //            FirstMonth = "Y";
+                            //        }
+
+                            //        if (Convert.ToDecimal(Money) < -1)
+                            //        {
+                            //            Money = Money * -1;
+                            //            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, TuitionFeeSubject, DetailID, 0, FirstMonth, "Y", "N", CreateDate, val.StudyDays, TuitionFeeMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                            //        }
+                            //        else {
+                            //            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, TuitionFeeSubject, DetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, TuitionFeeMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                            //        }
+
+                            //        if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
+                            //        {
+                            //            SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Plan Tuition Fee")));
+                            //        }
+
+                            //        IsFirstMonth = false;
+                            //        i++;
+
+                            //    }
+
+                            //}
 
 
                         }
@@ -1857,40 +1881,65 @@ namespace KMISHelper.Business
 
                             var i = 0;
                             var IsFirstMonth = true;
-                            foreach (KeyValuePair<string, MonthInfo> kv in MonthDict)
-                            {
 
-                                if (!kv.Key.Equals("summary"))
+                            foreach (MoneyInfo mi in mmi)
+                            {
+                                if (!string.IsNullOrEmpty(dr[mi.MoneyPos].ToString()) && Convert.ToDecimal(dr[mi.MoneyPos]) > 0)
                                 {
-                                    var key = kv.Key;
-                                    var val = kv.Value;
                                     var BillPlanID = InitObject.GetUUID();
                                     var FirstMonth = "N";
-                                    var Money = Convert.ToDecimal(dr[mmi[i].MoneyPos]);
+                                    var Money = Convert.ToDecimal(dr[mi.MoneyPos]);
+                                    var sd = Convert.ToDateTime(mi.Month);
+                                    var md = new Dictionary<string, MonthInfo>();
+                                    md = InitObject.SplitMonth(sd, 1, myClassInfo.CalendarId, YearID);
+                                    KeyValuePair<string, MonthInfo> kvp = md.FirstOrDefault();
 
-                                    if (IsFirstMonth)
-                                    {
-                                        FirstMonth = "Y";
-                                    }
-
-                                    if (Convert.ToDecimal(Money) < -1)
-                                    {
-                                        Money = Money * -1;
-                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, MealsSubject, mDetailID, 0, FirstMonth, "Y", "N", CreateDate, val.StudyDays, MealsMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
-                                    }
-                                    else {
-                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, MealsSubject, mDetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, MealsMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
-                                    }
-
-
-                                    if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                    {
-                                        SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Plan Meals Fee")));
-                                    }
-                                    IsFirstMonth = false;
-                                    i++;
+                                    var tsd = md["summary"].StartDate.ToString("yyyy-MM-dd");
+                                    var ted = md["summary"].EndDate.ToString("yyyy-MM-dd");
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, MealsSubject, mDetailID, 1, FirstMonth, "Y", "N", CreateDate, kvp.Value.StudyDays, MealsMoney, Money, tsd,ted);
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
                                 }
+                                IsFirstMonth = false;
+                                i++;
                             }
+
+
+                            //var i = 0;
+                            //var IsFirstMonth = true;
+                            //foreach (KeyValuePair<string, MonthInfo> kv in MonthDict)
+                            //{
+
+                            //    if (!kv.Key.Equals("summary"))
+                            //    {
+                            //        var key = kv.Key;
+                            //        var val = kv.Value;
+                            //        var BillPlanID = InitObject.GetUUID();
+                            //        var FirstMonth = "N";
+                            //        var Money = Convert.ToDecimal(dr[mmi[i].MoneyPos]);
+
+                            //        if (IsFirstMonth)
+                            //        {
+                            //            FirstMonth = "Y";
+                            //        }
+
+                            //        if (Convert.ToDecimal(Money) < -1)
+                            //        {
+                            //            Money = Money * -1;
+                            //            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, MealsSubject, mDetailID, 0, FirstMonth, "Y", "N", CreateDate, val.StudyDays, MealsMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                            //        }
+                            //        else {
+                            //            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, MealsSubject, mDetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, MealsMoney, Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                            //        }
+
+
+                            //        if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
+                            //        {
+                            //            SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Plan Meals Fee")));
+                            //        }
+                            //        IsFirstMonth = false;
+                            //        i++;
+                            //    }
+                            //}
 
                         }
                         else
@@ -1976,41 +2025,68 @@ namespace KMISHelper.Business
 
                             // Insert into bill plan.
 
+
                             var i = 0;
                             var IsFirstMonth = true;
-                            foreach (KeyValuePair<string, MonthInfo> kv in MonthDict)
-                            {
 
-                                if (!kv.Key.Equals("summary"))
+                            foreach (MoneyInfo mi in sbmi)
+                            {
+                                if (!string.IsNullOrEmpty(dr[mi.MoneyPos].ToString()) && Convert.ToDecimal(dr[mi.MoneyPos]) > 0)
                                 {
-                                    var key = kv.Key;
-                                    var val = kv.Value;
                                     var BillPlanID = InitObject.GetUUID();
                                     var FirstMonth = "N";
-                                    var Money = Convert.ToDecimal( dr[sbmi[i].MoneyPos]);
+                                    var Money = Convert.ToDecimal(dr[mi.MoneyPos]);
+                                    var sd = Convert.ToDateTime(mi.Month);
+                                    var md = new Dictionary<string, MonthInfo>();
+                                    md = InitObject.SplitMonth(sd, 1, myClassInfo.CalendarId, YearID);
+                                    KeyValuePair<string, MonthInfo> kvp = md.FirstOrDefault();
 
-                                    if (IsFirstMonth)
-                                    {
-                                        FirstMonth = "Y";
-                                    }
+                                    var tsd = md["summary"].StartDate.ToString("yyyy-MM-dd");
+                                    var ted = md["summary"].EndDate.ToString("yyyy-MM-dd");
 
-                                    if (Money < -1)
-                                    {
-                                        Money = Money * -1;
-                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, sbSubject, sbDetailID, 0, FirstMonth, "Y", "N", CreateDate, val.StudyDays, Convert.ToDecimal(sbMoney), Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
-                                    }
-                                    else {
-                                        Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, sbSubject, sbDetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, Convert.ToDecimal(sbMoney), Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
-                                    }
-
-                                    if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
-                                    {
-                                        SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Plan School bus Fee")));
-                                    }
-                                    IsFirstMonth = false;
-                                    i++;
+                                    Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, sbSubject, sbDetailID, 1, FirstMonth, "Y", "N", CreateDate, kvp.Value.StudyDays, Convert.ToDecimal(sbMoney), Money, tsd,ted);
+                                    DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null);
                                 }
+                                IsFirstMonth = false;
+                                i++;
                             }
+
+
+                            //var i = 0;
+                            //var IsFirstMonth = true;
+                            //foreach (KeyValuePair<string, MonthInfo> kv in MonthDict)
+                            //{
+
+                            //    if (!kv.Key.Equals("summary"))
+                            //    {
+                            //        var key = kv.Key;
+                            //        var val = kv.Value;
+                            //        var BillPlanID = InitObject.GetUUID();
+                            //        var FirstMonth = "N";
+                            //        var Money = Convert.ToDecimal( dr[sbmi[i].MoneyPos]);
+
+                            //        if (IsFirstMonth)
+                            //        {
+                            //            FirstMonth = "Y";
+                            //        }
+
+                            //        if (Money < -1)
+                            //        {
+                            //            Money = Money * -1;
+                            //            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, sbSubject, sbDetailID, 0, FirstMonth, "Y", "N", CreateDate, val.StudyDays, Convert.ToDecimal(sbMoney), Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                            //        }
+                            //        else {
+                            //            Sql = string.Format(InitObject.GetScriptServiceInstance().InsertFinBillPlan, BillPlanID, BillNo, sbSubject, sbDetailID, 1, FirstMonth, "Y", "N", CreateDate, val.StudyDays, Convert.ToDecimal(sbMoney), Money, val.StartDate.ToString("yyyy-MM-dd"), val.EndDate.ToString("yyyy-MM-dd"));
+                            //        }
+
+                            //        if (DBHelper.MySqlHelper.ExecuteNonQuery(trans, BznsBase.GetCommandType, Sql, null) <= 0)
+                            //        {
+                            //            SysLog.Insert(new SysLogInfo(string.Concat(StudentNo, " bill plan insert error."), SysLogType.WARNING, string.Concat(ModuleName, " - ", "Import Bill Plan School bus Fee")));
+                            //        }
+                            //        IsFirstMonth = false;
+                            //        i++;
+                            //    }
+                            //}
 
                         }
                         else
